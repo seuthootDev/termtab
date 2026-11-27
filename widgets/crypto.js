@@ -1,6 +1,6 @@
 import { h } from "../shell/dom.js";
 import { uiLanguage } from "../lib/i18n.js";
-import { getJson, isObj, isNum, bad, nf, loadingLine } from "./net.js";
+import { getJson, isObj, isNum, bad, nf, noData } from "./net.js";
 
 const API = "https://api.coingecko.com/api/v3/simple/price";
 const TICKER = { bitcoin: "BTC", ethereum: "ETH", solana: "SOL", dogecoin: "DOGE", ripple: "XRP", cardano: "ADA", litecoin: "LTC", tether: "USDT" };
@@ -43,7 +43,7 @@ export default {
   },
   render(el, ctx) {
     const { t, data: d } = ctx;
-    if (!d) return void el.append(loadingLine(t));
+    if (noData(el, ctx)) return;
     const lang = uiLanguage();
     const order = ids(ctx.settings);
     const coins = [...d.coins].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));

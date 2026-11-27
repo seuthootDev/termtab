@@ -9,6 +9,7 @@ import hn, { buildUrl as hnUrl, itemUrl } from "../widgets/hn.js";
 import devto, { buildUrl as devtoUrl } from "../widgets/devto.js";
 import trending, { buildUrl as trendingUrl } from "../widgets/trending.js";
 import wiki, { buildUrl as wikiUrl, resolveLang } from "../widgets/wiki.js";
+import { noData } from "../widgets/net.js";
 import { WIDGETS } from "../widgets/index.js";
 import { DEMO } from "../demo/data.js";
 
@@ -122,10 +123,11 @@ test("wiki parse and url", () => {
   assert.ok(d.some((e) => /^https?:/.test(e.url ?? "")));
   assert.equal(wikiUrl(wiki.defaults, new Date(2026, 10, 27)),
     "https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/events/11/27");
-  assert.equal(wikiUrl({ lang: "ko" }, new Date(2026, 0, 5)),
-    "https://api.wikimedia.org/feed/v1/wikipedia/ko/onthisday/events/01/05");
+  assert.equal(wikiUrl({ lang: "de" }, new Date(2026, 0, 5)),
+    "https://api.wikimedia.org/feed/v1/wikipedia/de/onthisday/events/01/05");
   assert.equal(resolveLang("auto"), "en");
-  assert.equal(resolveLang("ko"), "ko");
+  assert.equal(resolveLang("ko"), "en"); // no ko feed
+  assert.equal(resolveLang("de"), "de");
 });
 
 test("every parse rejects {} and null with an Error", () => {
@@ -146,4 +148,50 @@ test("online widgets: contract, ttl, registered, demo data present", () => {
     assert.equal(typeof w.render, "function");
     assert.ok(DEMO[id] && Object.keys(DEMO[id]).length, `demo ${id}`);
   }
+});
+
+const withUi = (ui, fn) => {
+  globalThis.chrome = { i18n: { getUILanguage: () => ui } };
+  try { return fn(); } finally { delete globalThis.chrome; }
+};
+
+test("wiki auto: ko maps to en, de and a region tag stay", () => {
+  assert.equal(withUi("ko", () => resolveLang("auto")), "en");
+  assert.equal(withUi("de", () => resolveLang("auto")), "de");
+  assert.equal(withUi("pt-BR", () => resolveLang("auto")), "pt");
+  assert.equal(withUi("xx", () => resolveLang("auto")), "en");
+});
+
+test("wiki fetch retries en once on a 404 and the result parses", async () => {
+  const urls = [];
+  const real = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    urls.push(url);
+    return url.includes("/wikipedia/de/") ? { ok: false, status: 404 } : { ok: true, status: 200, json: async () => fx("wiki") };
+  };
+  try {
+    const raw = await wiki.fetch({ lang: "de" }, new Date(2026, 10, 27));
+    assert.equal(wiki.parse(raw).length, 3);
+    assert.equal(urls.length, 2);
+    assert.ok(urls[1].includes("/wikipedia/en/"));
+    urls.length = 0;
+    globalThis.fetch = async (url) => (urls.push(url), { ok: false, status: 500 });
+    await assert.rejects(wiki.fetch({ lang: "de" }, new Date(2026, 10, 27)), /http 500/);
+    assert.equal(urls.length, 1);
+  } finally {
+    globalThis.fetch = real;
+  }
+});
+
+test("noData: loading line without error, nothing when the fetch failed, false with data", () => {
+  const mk = () => ({ kids: [], append(...k) { this.kids.push(...k); } });
+  globalThis.document ??= { createElement: () => ({ append() {}, setAttribute() {}, addEventListener() {} }) };
+  const t = (k) => k;
+  const a = mk();
+  assert.equal(noData(a, { data: null, error: false, t }), true);
+  assert.equal(a.kids.length, 1);
+  const b = mk();
+  assert.equal(noData(b, { data: null, error: true, t }), true);
+  assert.equal(b.kids.length, 0);
+  assert.equal(noData(mk(), { data: {}, error: false, t }), false);
 });

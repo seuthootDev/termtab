@@ -1,5 +1,5 @@
 import { h } from "../shell/dom.js";
-import { getJson, isObj, isNum, bad, link, loadingLine } from "./net.js";
+import { getJson, isObj, isNum, bad, link, noData } from "./net.js";
 
 const API = "https://hacker-news.firebaseio.com/v0";
 const MAX = 10;
@@ -43,11 +43,11 @@ export default {
   },
   render(el, ctx) {
     const { t, data } = ctx;
-    if (!data) return void el.append(loadingLine(t));
+    if (noData(el, ctx)) return;
     el.append(h("ol", {}, ...data.map((s, i) => h("li", { class: "row" },
       h("span", {}, h("span", { class: "dim" }, `${String(i + 1).padStart(2, "0")}. `), link(s.url, s.title),
         " ", h("span", { class: "dim" }, `(${s.host})`)),
-      h("span", { class: "num dim" }, `${s.score}▲ ${s.comments}c`)))));
+      h("span", { class: "num dim", style: "white-space:nowrap;flex:none" }, `${s.score}▲ ${s.comments}c`)))));
   },
   settingsForm(settings, t) {
     const n = h("input", { class: "inp", type: "number", min: 1, max: MAX, "aria-label": t("hnCount") });

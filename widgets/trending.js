@@ -1,5 +1,5 @@
 import { h } from "../shell/dom.js";
-import { getJson, isObj, isNum, bad, link, loadingLine } from "./net.js";
+import { getJson, isObj, isNum, bad, link, noData } from "./net.js";
 
 const day = (d) => d.toISOString().slice(0, 10);
 
@@ -30,7 +30,7 @@ export default {
   },
   render(el, ctx) {
     const { t, data } = ctx;
-    if (!data) return void el.append(loadingLine(t));
+    if (noData(el, ctx)) return;
     el.append(h("ul", {}, ...data.map((r) => h("li", { class: "row", title: r.desc || null },
       h("span", {}, link(r.url, r.name), " ", h("span", { class: "dim" }, r.lang)),
       h("span", { class: "num y" }, `★${short(r.stars)}`)))));

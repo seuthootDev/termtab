@@ -1,5 +1,5 @@
 import { h } from "../shell/dom.js";
-import { getJson, isObj, isNum, bad, link, loadingLine } from "./net.js";
+import { getJson, isObj, isNum, bad, link, noData } from "./net.js";
 
 export const buildUrl = () => "https://dev.to/api/articles?top=7&per_page=5";
 
@@ -19,7 +19,7 @@ export default {
   },
   render(el, ctx) {
     const { t, data } = ctx;
-    if (!data) return void el.append(loadingLine(t));
+    if (noData(el, ctx)) return;
     el.append(h("ol", {}, ...data.map((a) => h("li", { class: "row" },
       h("span", {}, link(a.url, a.title)), h("span", { class: "num dim" }, `♥${a.reactions}`)))));
   },

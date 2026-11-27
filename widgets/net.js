@@ -5,7 +5,7 @@ import { isSafeUrl } from "./links.js";
 /** GET a public JSON API: no credentials, throws Error("http <status>") on a non-2xx answer. */
 export async function getJson(url) {
   const res = await fetch(url, { credentials: "omit" });
-  if (!res.ok) throw new Error("http " + res.status);
+  if (!res.ok) throw Object.assign(new Error("http " + res.status), { status: res.status });
   return res.json();
 }
 
@@ -26,7 +26,13 @@ export function link(url, text, props = {}) {
     : h("span", props, text);
 }
 
-export const loadingLine = (t) => h("span", { class: "dim" }, t("loading"));
+/** True (and draws a dim "loading…" line) while there is no data yet. Nothing is drawn when the fetch
+ *  failed: the shell already prints "fetch failed · retry" then. */
+export function noData(el, ctx) {
+  if (ctx.data) return false;
+  if (!ctx.error) el.append(h("span", { class: "dim" }, ctx.t("loading")));
+  return true;
+}
 
 export const nf = (lang, opts) => {
   try {

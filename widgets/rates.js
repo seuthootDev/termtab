@@ -1,6 +1,6 @@
 import { h } from "../shell/dom.js";
 import { uiLanguage } from "../lib/i18n.js";
-import { getJson, isObj, isNum, bad, nf, loadingLine } from "./net.js";
+import { getJson, isObj, isNum, bad, nf, noData } from "./net.js";
 
 // One request per target in parallel: `/latest?from=<target>&to=<base>` gives "1 <target> = x <base>" directly.
 const API = "https://api.frankfurter.dev/v1/latest";
@@ -46,7 +46,7 @@ export default {
   },
   render(el, ctx) {
     const { t, data: d } = ctx;
-    if (!d) return void el.append(loadingLine(t));
+    if (noData(el, ctx)) return;
     const lang = uiLanguage();
     el.append(
       h("ul", {}, ...d.rows.map((r) => h("li", { class: "row" }, h("span", {}, rateText(r, d.base, lang))))),

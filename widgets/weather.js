@@ -1,6 +1,6 @@
 import { h } from "../shell/dom.js";
 import { uiLanguage } from "../lib/i18n.js";
-import { getJson, isObj, isNum, needNums, bad, loadingLine } from "./net.js";
+import { getJson, isObj, isNum, needNums, bad, noData } from "./net.js";
 
 const FORECAST = "https://api.open-meteo.com/v1/forecast";
 const GEOCODE = "https://geocoding-api.open-meteo.com/v1/search";
@@ -70,7 +70,7 @@ export default {
   },
   render(el, ctx) {
     const { t, data: d } = ctx;
-    if (!d) return void el.append(loadingLine(t));
+    if (noData(el, ctx)) return;
     const w = wmo(d.code);
     const tm = wmo(d.tomorrow.code);
     el.append(
