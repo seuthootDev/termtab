@@ -673,5 +673,8 @@
   },
   "aboutData": {
     "message": "Data sources"
+  },
+  "importTooLarge": {
+    "message": "That file is too large (over 1 MB). Nothing was changed."
   }
 }

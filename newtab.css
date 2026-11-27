@@ -159,6 +159,7 @@ input[type=range]{accent-color:var(--green)}
 /* wallpapers (Preferences): dark gradients, selected by a class on body */
 body.wp-2{--desk1:#14231f; --desk2:#1f3a33; --desk3:#10202b}
 body.wp-3{--desk1:#1c1c1f; --desk2:#2a2a31; --desk3:#17171a}
-.htop{white-space:pre}
+.htop{white-space:pre;font-variant-numeric:tabular-nums}
+.htop-l{display:inline-block;width:5ch;overflow:hidden;vertical-align:bottom}
 .prefs-msg{min-height:1.4em}
 .prefs-sep{border:0;border-top:1px solid var(--line);margin:4px 0}

@@ -2,10 +2,11 @@
 import { h, today } from "./dom.js";
 import { WIDGETS } from "../widgets/index.js";
 import { validateWorkday } from "../widgets/workday.js";
-import { DEFAULT_PREFS, WALLPAPERS, validName, exportSettings, applyImport, exportKeys } from "../lib/prefs.js";
+import { DEFAULT_PREFS, WALLPAPERS, validName, exportSettings, applyImport, exportKeys, MAX_IMPORT_BYTES } from "../lib/prefs.js";
 
 const IMPORT_ERRORS = {
   "bad-json": "importBadJson",
+  "too-large": "importTooLarge",
   "not-termtab": "importNotTermtab",
   "newer-version": "importNewer",
   "bad-data": "importBadData",
@@ -112,6 +113,7 @@ export function createPanels({ t, overlays, getPrefs, setPrefs, grid, byId, stor
       picker.value = "";
       if (!file) return;
       try {
+        if (file.size > MAX_IMPORT_BYTES) throw new Error("too-large");
         await applyImport(await file.text(), { set: (data) => storage.set(data), reload: () => location.reload() });
       } catch (err) {
         say(t(IMPORT_ERRORS[err?.message] ?? "importFailed"));

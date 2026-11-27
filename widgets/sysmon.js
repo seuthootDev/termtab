@@ -34,8 +34,8 @@ const pct = (r) => `${Math.round(r * 100)}%`;
 function bar(label, ratio, tail) {
   const w = 20;
   const on = Math.round(clamp01(ratio) * w);
-  return h("div", { class: "row htop" },
-    h("span", { class: "c" }, label.padEnd(4)), "[",
+  return h("div", { class: "htop" },
+    h("span", { class: "c htop-l" }, label), "[",
     h("span", { class: color(ratio) }, "|".repeat(on)),
     h("span", { class: "dim" }, " ".repeat(w - on)), "] ", tail);
 }

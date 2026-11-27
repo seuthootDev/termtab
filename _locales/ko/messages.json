@@ -603,7 +603,7 @@
     "message": "측정 중…"
   },
   "smMem": {
-    "message": "메모리"
+    "message": "Mem"
   },
   "prefsTemp": {
     "message": "온도 단위"
@@ -673,5 +673,8 @@
   },
   "aboutData": {
     "message": "데이터 출처"
+  },
+  "importTooLarge": {
+    "message": "파일이 너무 커요(1MB 초과). 아무것도 바뀌지 않았어요."
   }
 }
