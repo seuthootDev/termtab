@@ -1,0 +1,178 @@
+# termtab — design
+
+Date: 2026-11-27
+Status: draft for the owner's approval. Working name `termtab`; the final name is open.
+
+## Intent
+
+A free Chrome extension that replaces the new tab page with a dashboard of widgets (clock, focus timer, to-do, weather, news, and more), drawn as a macOS desktop: a menu bar on top and each widget in its own macOS Terminal window with traffic-light buttons, a centered title like `you — weather — zsh — 80×24`, and a zsh prompt line (`you@MacBook ~ % weather seoul`). The user picks which widgets to show, drags windows to reorder them, and the layout is remembered.
+
+Why: the owner's earlier projects (GitHub README tools) only reach GitHub users and were hard to grow. This tests the Chrome Web Store as a channel with something anyone can use. The terminal look is the hook ("makes your browser look like a developer's"), the widgets are the reason to keep it. A mockup was approved on 2026-11-27 (artifact "Terminal New Tab").
+
+## Goals
+
+- Open instantly on every new tab with the user's chosen widgets.
+- Let the user add and remove widgets from a list, reorder them by dragging, and keep that layout.
+- Feel like macOS Terminal: menu bar, traffic lights that work (red closes the widget, yellow minimizes it to its title bar, green toggles wide), rounded windows with shadows, SF Mono/Menlo, zsh prompt lines.
+- Install with no permission warnings.
+- English and Korean, following the browser language.
+
+## Non-goals (v1)
+
+- Typing commands as the way to use it (it looks like a terminal; it is used with clicks).
+- Accounts, sync across devices, cloud backup.
+- Free-form window positions or resizing (a tidy grid with drag-to-reorder instead).
+- Light theme or other terminal looks (PowerShell, Ubuntu). The CSS keeps colors as variables so they can come later.
+- Widgets that need sign-in (Gmail, Google Calendar) or a paid API key (stocks).
+- Firefox, Safari.
+
+## Anti-goals (failure even if it works)
+
+- A new tab that waits on the network. The page must render from saved data first; fetching happens after and updates in place.
+- Any install permission warning.
+- Sending anything about the user anywhere except the minimum a widget needs to fetch its data (a city's coordinates for weather, a GitHub username for the graph), and only while that widget is on.
+- Text that glows, flickers or is hard to read.
+
+## Constraints
+
+- Manifest V3, `chrome_url_overrides.newtab`.
+- Permissions: `storage`, `alarms`. Nothing that shows a warning. (`notifications` is not requested; see the focus timer.)
+- No host permissions: every data source must allow cross-origin requests from an extension page. Checked on 2026-11-27 (all return `Access-Control-Allow-Origin`):
+  - Open-Meteo forecast and geocoding (`api.open-meteo.com`, `geocoding-api.open-meteo.com`), no key
+  - Hacker News (`hacker-news.firebaseio.com`)
+  - Frankfurter (`api.frankfurter.dev/v1`; the old `api.frankfurter.app` redirects)
+  - CoinGecko (`api.coingecko.com/api/v3`), free tier with rate limits
+  - Wikimedia "on this day" (`api.wikimedia.org/feed/v1/wikipedia/<lang>/onthisday`)
+  - DEV (`dev.to/api/articles`)
+  - GitHub search (`api.github.com/search/repositories`), 10 requests/min unauthenticated
+- No remote code. Images may load from other origins (the GitHub graph widget shows an image from the owner's card service).
+- Chrome shows its own "Is this the new tab page you expected?" bubble after install; that is unavoidable for new-tab extensions.
+
+## Approaches considered
+
+| | Approach | Trade-off | Decision |
+|---|---|---|---|
+| A | Plain MV3, ES modules, no build; each widget a module with a fixed interface; pure logic tested with `node --test` | Same as the owner's previous extension; small, fast new tab; drag and drop written by hand | **Chosen** (builder's call) |
+| B | WXT + a UI framework | Comfortable for many widgets; bigger bundle on every new tab, more tooling | Not now |
+| C | Bundle a drag-and-drop/grid library | Faster drag-and-drop; extra weight for one feature | Rejected; drag is ~150 lines |
+
+## How it works
+
+### Files
+
+```
+manifest.json
+newtab.html, newtab.css, newtab.js     page shell: menu bar, search window, grid, widget drawer, drag
+background.js                          alarms for the focus timer, badge
+lib/store.js                           typed wrapper over chrome.storage.local (layout, widget settings, cache)
+lib/cache.js                           stale-while-revalidate: get(key, ttl, fetcher)
+lib/layout.js                          pure: add, remove, move(from, to), toggle wide/minimized
+lib/timer.js                           pure focus-timer state machine
+lib/dates.js                           pure: ISO week, month grid, habit week, countdown days
+widgets/<id>.js                        one module per widget
+_locales/en, _locales/ko
+icons/, test/, scripts/ (screenshot, package)
+```
+
+### Widget interface
+
+Each `widgets/<id>.js` exports:
+- `meta`: `{ id, category, size: "small" | "wide", source, command }` (`command` is the text after the prompt, e.g. `weather seoul`; names and descriptions come from `_locales`).
+- `defaults`: its settings, e.g. weather `{ city: "Seoul", lat, lon, unit: "c" }`.
+- `render(el, ctx)`: draws into `el` from `ctx.settings` and `ctx.cache`; may return a cleanup function. `ctx.refresh()` asks the shell to fetch again; `ctx.save(settings)` stores changed settings.
+- `fetch(settings)` (online widgets only): returns plain data for the cache.
+- `parse(raw)`: pure, unit-tested against saved API responses in `test/fixtures/`.
+- `settingsForm(settings)`: fields shown when the user opens the widget's settings from its title bar (`⋯`).
+
+### Widgets in v1
+
+| Category | Widget | Data | Refresh |
+|---|---|---|---|
+| basics | Clock (big digits, date, ISO week) | computer | 1 s while open |
+| basics | Quick links (user's own list) | storage | — |
+| basics | Search bar window (Google, DuckDuckGo, Naver, GitHub) | — | — |
+| focus | Focus timer (25/5 pomodoro, today's count) | storage + `alarms` | — |
+| focus | To-do | storage | — |
+| focus | Notes (saves as you type) | storage | — |
+| focus | Habits (this week, user's habit names) | storage | — |
+| focus | Countdown (named date, D-n) | storage | — |
+| info | Weather (now, hi/lo, next 12 h sparkline, tomorrow) | Open-Meteo | 30 min |
+| info | Calendar (month, today) | computer | — |
+| info | World clocks (user's cities) | computer | 30 s |
+| info | Exchange rates (base and targets the user picks) | Frankfurter | 6 h |
+| info | Crypto prices (coins the user picks, 24 h change) | CoinGecko | 5 min |
+| news | Hacker News top (count 5–10) | HN API | 15 min |
+| news | DEV top posts this week | DEV API | 1 h |
+| news | GitHub trending (most-starred repos created in the last 7 days) | GitHub search | 6 h |
+| news | On this day | Wikimedia | 24 h |
+| fun | System info, neofetch style (browser, OS, screen, cores, online, open tab count via `chrome.tabs.query` count only) | browser | — |
+| fun | GitHub contributions (image from the owner's terminal card service for a username) | image URL | browser cache |
+| fun | Fortune (bundled quotes, cowsay frame) | bundled | per tab |
+
+The search bar is always first and cannot be removed. Default set for a new install: clock, focus timer, weather, to-do, Hacker News, calendar, notes.
+
+### Data and caching
+
+- `cache.get(key, ttl, fetcher)` returns the saved value at once (even if stale) and, when older than `ttl`, fetches in the background and re-renders that one widget. Fetches only happen while a new tab is open; there is no background polling.
+- Concurrent new tabs share one in-flight fetch per key (a lock in `chrome.storage.session`).
+- On failure the widget keeps the old data and shows `fetch failed · retry` in its status line; nothing else on the page is affected.
+- Weather location: a city search box using Open-Meteo geocoding, no location permission.
+
+### Layout, windows and drag
+
+- Stored as `layout: [{ id, wide, minimized }]` in order. The grid flows left to right (CSS grid, `auto-fill`, min 320 px), wide windows span two columns.
+- Traffic lights: red removes the widget (its settings are kept, so adding it back restores them), yellow toggles minimized (title bar only), green toggles wide.
+- Drag: press on a title bar (not on a button) and move; a placeholder shows where the window will land; drop saves the new order. Pointer events, so mouse, pen and touch work. Keyboard: focus a title bar and press `Alt+←/→` to move it one place.
+- Widget drawer (menu bar "＋ Widgets"): every widget grouped by category with a checkbox, description, data source and its command; checking adds it at the end.
+
+### Menu bar
+
+`Terminal` (Widgets…, Preferences…, About), and on the right the date and time. Preferences: 24-hour clock, temperature unit, wallpaper (three dark gradients), font size (small/medium/large), "reset layout".
+
+### Focus timer across tabs
+
+- State `{ mode: focus|break, endsAt | remaining, running, doneToday, day }` lives in storage, so every new tab shows the same countdown.
+- `background.js` sets a `chrome.alarms` alarm for `endsAt`. When it fires: switch mode, increase the count, and set the toolbar badge (`✓`, cleared on the next new tab). If a new tab is open it also plays a short chime (only after the user has interacted with the page, per autoplay rules).
+- No system notifications in v1, to keep the install free of warnings.
+
+### Visual design
+
+- Desktop: dark gradient wallpaper; menu bar 28 px, translucent with blur.
+- Window: background `#1e1e1e`, title bar gradient `#383838 → #2e2e2e`, radius 10 px, macOS-like shadow; traffic lights `#ff5f57`, `#febc2e`, `#28c840`.
+- Text `#d4d4d4`, dim `#8a8a8a`; accents One Dark (yellow `#e5c07b`, blue `#61afef`, green `#98c379`, red `#e06c75`, purple `#c678dd`, cyan `#56b6c2`).
+- Fonts: `"SF Mono", Menlo, Monaco, "JetBrains Mono", "Cascadia Code", Consolas, "D2Coding", monospace` for content; system UI font for the menu bar and title bars. No web fonts downloaded at runtime (fonts may be bundled).
+- Prompt line on every widget: `you@MacBook ~ % <command>`; "you" and "MacBook" can be changed in Preferences.
+
+### Privacy
+
+- Stored only in `chrome.storage.local` on the device.
+- Network requests go only to the data sources of widgets that are switched on, carrying only what that request needs. Listed in the store privacy section and `PRIVACY.md`.
+
+### Testing
+
+- `node --test`: layout operations, cache TTL decisions, timer state machine, date helpers, every widget's `parse` against fixture JSON, locale key coverage, manifest test (permissions exactly `storage`, `alarms`; `newtab` override; every file exists).
+- `?demo=1` loads bundled sample data for every widget; a headless screenshot script renders the page from it for review and store images.
+- GitHub Actions runs the Node tests.
+
+### Release
+
+- `npm run package` writes the store zip (manifest at root, forward slashes).
+- The owner registers the store account ($5 once) and submits; public GitHub repo with README, privacy policy and screenshots.
+
+## Decided by the owner
+
+- A Chrome extension, as an experiment with the Chrome Web Store.
+- New tab page dashboard with as many widgets as possible, chosen by the user.
+- macOS Terminal look, used with clicks, not commands.
+- Drag to reorder.
+- No install warnings (the earlier "tabtime" idea was dropped for that reason).
+
+## Left to the builder
+
+- Exact visuals within the values above, wallpaper gradients, cowsay/neofetch art.
+- Quotes for Fortune (public-domain or self-written).
+- Rate-limit backoff details per API.
+
+## Open
+
+- Final name and store title (working name `termtab`).
