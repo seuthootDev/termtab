@@ -18,9 +18,9 @@ import { createTop } from "./shell/top.js";
 import { createPanels } from "./shell/panels.js";
 import { enableShortcuts } from "./shell/shortcuts.js";
 import { shouldChime, playChime } from "./shell/chime.js";
+import { DEFAULT_PREFS, FONT_PX, WALLPAPERS } from "./lib/prefs.js";
 import { announceFocusStart } from "./widgets/timer.js";
 
-const DEFAULT_PREFS = { user: "you", machine: "MacBook", clock24: true, searchEngine: "google" };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 async function main() {
@@ -53,7 +53,14 @@ async function main() {
     applyPrefs();
     store.set("prefs", prefs);
   }
+  function applyAppearance() {
+    const wp = WALLPAPERS.includes(prefs.wallpaper) ? prefs.wallpaper : 1;
+    for (const c of [...document.body.classList]) if (c.startsWith("wp-")) document.body.classList.remove(c);
+    document.body.classList.add(`wp-${wp}`);
+    document.body.style.fontSize = `${FONT_PX[prefs.fontSize] ?? FONT_PX.medium}px`;
+  }
   function applyPrefs() {
+    applyAppearance();
     grid.rerenderAll(layout);
     top.refresh();
     menubar.refresh();
@@ -71,7 +78,10 @@ async function main() {
       openSettings: (id) => panels.settings(id),
     },
   });
-  const panels = createPanels({ t, overlays, getPrefs, setPrefs, grid, byId });
+  const panels = createPanels({
+    t, overlays, getPrefs, setPrefs, grid, byId, store, storage: area,
+    resetLayout: () => setLayout(defaultLayout(metaById)),
+  });
   const drawer = createDrawer({ t, getPrefs, getLayout, setLayout });
   const top = createTop({ t, store, getPrefs, setPrefs });
   const menubar = createMenubar({
@@ -138,6 +148,7 @@ async function main() {
     if (gesture && shouldChime(v, old)) playChime();
   });
 
+  applyAppearance();
   grid.sync(layout);
   top.refresh();
   drawer.refresh();

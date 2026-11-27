@@ -24,6 +24,7 @@ import fortune from "./fortune.js";
 import calculator from "./calculator.js";
 import workday from "./workday.js";
 import sysinfo from "./sysinfo.js";
+import sysmon from "./sysmon.js";
 import timer from "./timer.js";
 import todo from "./todo.js";
 import notes from "./notes.js";
@@ -51,6 +52,7 @@ export const WIDGETS = [
   calculator,
   workday,
   sysinfo,
+  sysmon,
   notes,
   habits,
   ambient,

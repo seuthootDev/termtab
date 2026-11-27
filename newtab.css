@@ -155,3 +155,10 @@ input[type=range]{accent-color:var(--green)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .cursor{display:inline-block;width:.6em;height:1.1em;background:var(--fg);vertical-align:-.2em;animation:bl 1.1s steps(1) infinite;opacity:.7}
 @keyframes bl{50%{opacity:0}}
+
+/* wallpapers (Preferences): dark gradients, selected by a class on body */
+body.wp-2{--desk1:#14231f; --desk2:#1f3a33; --desk3:#10202b}
+body.wp-3{--desk1:#1c1c1f; --desk2:#2a2a31; --desk3:#17171a}
+.htop{white-space:pre}
+.prefs-msg{min-height:1.4em}
+.prefs-sep{border:0;border-top:1px solid var(--line);margin:4px 0}

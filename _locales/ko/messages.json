@@ -231,7 +231,7 @@
     "message": "포커스된 윈도우 이동 (제목 막대에서)"
   },
   "aboutFree": {
-    "message": "무료 오픈 소스(MIT). 계정도 추적도 없어요."
+    "message": "무료예요. 계정도 추적도 없고, 데이터는 브라우저 안에만 저장돼요."
   },
   "prefsUser": {
     "message": "프롬프트에 표시할 이름"
@@ -589,5 +589,89 @@
   },
   "wikiAuto": {
     "message": "자동 (브라우저 언어)"
+  },
+  "w_sysmon_name": {
+    "message": "시스템 모니터"
+  },
+  "w_sysmon_desc": {
+    "message": "htop 스타일의 CPU·메모리 사용량 막대"
+  },
+  "smUnavailable": {
+    "message": "여기서는 CPU와 메모리 정보를 불러올 수 없어요"
+  },
+  "smSampling": {
+    "message": "측정 중…"
+  },
+  "smMem": {
+    "message": "메모리"
+  },
+  "prefsTemp": {
+    "message": "온도 단위"
+  },
+  "prefsWallpaper": {
+    "message": "배경 화면"
+  },
+  "prefsFontSize": {
+    "message": "글자 크기"
+  },
+  "fontSmall": {
+    "message": "작게"
+  },
+  "fontMedium": {
+    "message": "보통"
+  },
+  "fontLarge": {
+    "message": "크게"
+  },
+  "prefsFocusMode": {
+    "message": "집중 세션 중에는 뉴스 창을 최소화"
+  },
+  "prefsAmbient": {
+    "message": "타이머와 함께 백색 소음 재생"
+  },
+  "prefsWorkStart": {
+    "message": "근무 시작 시각"
+  },
+  "prefsWorkEnd": {
+    "message": "근무 종료 시각"
+  },
+  "prefsNameInvalid": {
+    "message": "이름과 머신 이름은 공백만이 아닌 1~24자로 입력해 주세요."
+  },
+  "prefsWorkInvalid": {
+    "message": "근무 종료 시각은 시작 시각보다 늦어야 해요."
+  },
+  "prefsExport": {
+    "message": "설정 내보내기"
+  },
+  "prefsImport": {
+    "message": "설정 가져오기"
+  },
+  "prefsResetLayout": {
+    "message": "레이아웃 초기화"
+  },
+  "prefsResetConfirm": {
+    "message": "한 번 더 누르면 초기화돼요"
+  },
+  "prefsClose": {
+    "message": "닫기"
+  },
+  "importBadJson": {
+    "message": "올바른 JSON 파일이 아니에요. 아무것도 바뀌지 않았어요."
+  },
+  "importNotTermtab": {
+    "message": "termtab 설정 백업 파일이 아니에요. 아무것도 바뀌지 않았어요."
+  },
+  "importNewer": {
+    "message": "더 최신 버전의 termtab에서 만든 백업이에요. 확장 프로그램을 먼저 업데이트해 주세요. 아무것도 바뀌지 않았어요."
+  },
+  "importBadData": {
+    "message": "백업에 termtab이 알 수 없는 데이터가 들어 있어요. 아무것도 바뀌지 않았어요."
+  },
+  "importFailed": {
+    "message": "파일을 읽거나 적용하지 못했어요. 아무것도 바뀌지 않았어요."
+  },
+  "aboutData": {
+    "message": "데이터 출처"
   }
 }

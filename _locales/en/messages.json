@@ -231,7 +231,7 @@
     "message": "move the focused window (on its title bar)"
   },
   "aboutFree": {
-    "message": "Free and open source (MIT). No account, no tracking."
+    "message": "Free. No account, no tracking. Data stays in your browser."
   },
   "prefsUser": {
     "message": "Your name in the prompt"
@@ -589,5 +589,89 @@
   },
   "wikiAuto": {
     "message": "Auto (browser language)"
+  },
+  "w_sysmon_name": {
+    "message": "System monitor"
+  },
+  "w_sysmon_desc": {
+    "message": "htop-style CPU and memory bars"
+  },
+  "smUnavailable": {
+    "message": "CPU and memory info is not available here"
+  },
+  "smSampling": {
+    "message": "sampling…"
+  },
+  "smMem": {
+    "message": "Mem"
+  },
+  "prefsTemp": {
+    "message": "Temperature unit"
+  },
+  "prefsWallpaper": {
+    "message": "Wallpaper"
+  },
+  "prefsFontSize": {
+    "message": "Font size"
+  },
+  "fontSmall": {
+    "message": "Small"
+  },
+  "fontMedium": {
+    "message": "Medium"
+  },
+  "fontLarge": {
+    "message": "Large"
+  },
+  "prefsFocusMode": {
+    "message": "Minimize news windows during focus sessions"
+  },
+  "prefsAmbient": {
+    "message": "Play ambient sound with the timer"
+  },
+  "prefsWorkStart": {
+    "message": "Workday start"
+  },
+  "prefsWorkEnd": {
+    "message": "Workday end"
+  },
+  "prefsNameInvalid": {
+    "message": "Name and machine need 1 to 24 characters, not only spaces."
+  },
+  "prefsWorkInvalid": {
+    "message": "Workday end must be after its start."
+  },
+  "prefsExport": {
+    "message": "Export settings"
+  },
+  "prefsImport": {
+    "message": "Import settings"
+  },
+  "prefsResetLayout": {
+    "message": "Reset layout"
+  },
+  "prefsResetConfirm": {
+    "message": "Click again to reset"
+  },
+  "prefsClose": {
+    "message": "Close"
+  },
+  "importBadJson": {
+    "message": "That file is not valid JSON. Nothing was changed."
+  },
+  "importNotTermtab": {
+    "message": "That file is not a termtab settings backup. Nothing was changed."
+  },
+  "importNewer": {
+    "message": "That backup comes from a newer termtab. Update the extension first. Nothing was changed."
+  },
+  "importBadData": {
+    "message": "That backup contains data termtab does not recognize. Nothing was changed."
+  },
+  "importFailed": {
+    "message": "Could not read or apply that file. Nothing was changed."
+  },
+  "aboutData": {
+    "message": "Data sources"
   }
 }

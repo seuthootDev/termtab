@@ -1,8 +1,17 @@
-// Content of the modal windows: help (man termtab), about, preferences (basic; Task 8
-// extends it) and a widget's settings form.
-import { h } from "./dom.js";
+// Content of the modal windows: help (man termtab), about, preferences and a widget's settings form.
+import { h, today } from "./dom.js";
+import { WIDGETS } from "../widgets/index.js";
+import { validateWorkday } from "../widgets/workday.js";
+import { DEFAULT_PREFS, WALLPAPERS, validName, exportSettings, applyImport, exportKeys } from "../lib/prefs.js";
 
-export function createPanels({ t, overlays, getPrefs, setPrefs, grid, byId }) {
+const IMPORT_ERRORS = {
+  "bad-json": "importBadJson",
+  "not-termtab": "importNotTermtab",
+  "newer-version": "importNewer",
+  "bad-data": "importBadData",
+};
+
+export function createPanels({ t, overlays, getPrefs, setPrefs, grid, byId, storage, store, resetLayout }) {
   function help() {
     const rows = [
       ["/", t("helpSearch")],
@@ -24,37 +33,128 @@ export function createPanels({ t, overlays, getPrefs, setPrefs, grid, byId }) {
 
   function about() {
     const version = globalThis.chrome?.runtime?.getManifest?.().version ?? "";
+    const sources = [...new Set(WIDGETS.map((w) => w.meta.source))];
     overlays.open({
       key: "about",
       name: t("menuAbout"),
-      size: "80×8",
+      size: "80×14",
       body: h("div", {},
         h("div", { class: "y" }, `termtab ${version}`),
         h("div", {}, t("appDescription")),
-        h("div", { class: "dim" }, t("aboutFree"))),
+        h("div", { class: "dim" }, t("aboutFree")),
+        h("div", { class: "y", style: "margin-top:8px" }, t("aboutData")),
+        h("ul", {}, ...sources.map((k) => h("li", { class: "dim" }, t(k))))),
     });
   }
 
-  function preferences() {
-    const prefs = getPrefs();
-    const user = h("input", { class: "inp", value: prefs.user, maxlength: "32", autocomplete: "off" });
-    const machine = h("input", { class: "inp", value: prefs.machine, maxlength: "32", autocomplete: "off" });
-    const clock24 = h("input", { type: "checkbox", checked: !!prefs.clock24 });
+  // Unit and workday hours live in the widgets' own settings (single source of truth).
+  const readSettings = async (id) => ({
+    ...byId(id).defaults,
+    ...(grid.settingsOf(id) ?? (await store.get("settings:" + id, {}))),
+  });
+
+  async function doExport(say) {
+    try {
+      const dump = await storage.get(exportKeys());
+      const blob = new Blob([exportSettings(dump)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = h("a", { href: url, download: `termtab-settings-${today()}.json` });
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      say(t("importFailed"));
+    }
+  }
+
+  function resetButton() {
+    let armed = false;
+    const btn = h("button", { class: "sbtn", type: "button", onclick: () => {
+      if (!armed) {
+        armed = true;
+        btn.textContent = t("prefsResetConfirm");
+        return;
+      }
+      resetLayout();
+    } }, t("prefsResetLayout"));
+    return btn;
+  }
+
+  async function preferences() {
+    const prefs = { ...DEFAULT_PREFS, ...getPrefs() };
+    const weather = await readSettings("weather");
+    const workday = validateWorkday(await readSettings("workday"));
+    const text = (v) => h("input", { class: "inp", value: v, maxlength: "24", autocomplete: "off" });
+    const check = (v) => h("input", { type: "checkbox", checked: !!v });
+    const select = (opts, v) => {
+      const el = h("select", { class: "inp" }, ...opts.map(([val, label]) => h("option", { value: val }, label)));
+      el.value = String(v);
+      return el;
+    };
+    const user = text(prefs.user);
+    const machine = text(prefs.machine);
+    const clock24 = check(prefs.clock24);
+    const focusMode = check(prefs.focusMode);
+    const ambient = check(prefs.ambientWithTimer);
+    const unit = select([["c", "°C"], ["f", "°F"]], weather.unit === "f" ? "f" : "c");
+    const wallpaper = select(WALLPAPERS.map((n) => [n, `${t("prefsWallpaper")} ${n}`]), prefs.wallpaper);
+    const fontSize = select([["small", t("fontSmall")], ["medium", t("fontMedium")], ["large", t("fontLarge")]], prefs.fontSize);
+    const start = h("input", { class: "inp", type: "time", value: workday.start });
+    const end = h("input", { class: "inp", type: "time", value: workday.end });
+    const msg = h("div", { class: "prefs-msg r", role: "status" });
+    const say = (line) => { msg.textContent = line; };
+    const picker = h("input", { type: "file", accept: "application/json", hidden: true });
     let close;
-    const form = h("form", { class: "form", onsubmit: (e) => {
+
+    picker.addEventListener("change", async () => {
+      const file = picker.files?.[0];
+      picker.value = "";
+      if (!file) return;
+      try {
+        await applyImport(await file.text(), { set: (data) => storage.set(data), reload: () => location.reload() });
+      } catch (err) {
+        say(t(IMPORT_ERRORS[err?.message] ?? "importFailed"));
+      }
+    });
+
+    const form = h("form", { class: "form", onsubmit: async (e) => {
       e.preventDefault();
+      if (!validName(user.value) || !validName(machine.value)) return say(t("prefsNameInvalid"));
+      if (!start.value || !end.value || start.value >= end.value) return say(t("prefsWorkInvalid"));
+      await grid.saveSettings("weather", { ...weather, unit: unit.value });
+      await grid.saveSettings("workday", { ...(await readSettings("workday")), start: start.value, end: end.value });
       setPrefs({
         ...getPrefs(),
-        user: user.value.trim() || "you",
-        machine: machine.value.trim() || "MacBook",
+        user: user.value.trim(),
+        machine: machine.value.trim(),
         clock24: clock24.checked,
+        wallpaper: Number(wallpaper.value),
+        fontSize: fontSize.value,
+        focusMode: focusMode.checked,
+        ambientWithTimer: ambient.checked,
       });
       close();
     } },
       h("label", {}, t("prefsUser"), user),
       h("label", {}, t("prefsMachine"), machine),
       h("label", { class: "chk" }, clock24, t("prefsClock24")),
-      h("div", { class: "acts" }, h("button", { class: "sbtn", type: "submit" }, t("save"))));
+      h("label", {}, t("prefsTemp"), unit),
+      h("label", {}, t("prefsWallpaper"), wallpaper),
+      h("label", {}, t("prefsFontSize"), fontSize),
+      h("label", { class: "chk" }, focusMode, t("prefsFocusMode")),
+      h("label", { class: "chk" }, ambient, t("prefsAmbient")),
+      h("label", {}, t("prefsWorkStart"), start),
+      h("label", {}, t("prefsWorkEnd"), end),
+      msg,
+      h("hr", { class: "prefs-sep" }),
+      h("div", { class: "acts" },
+        h("button", { class: "sbtn", type: "button", onclick: () => doExport(say) }, t("prefsExport")),
+        h("button", { class: "sbtn", type: "button", onclick: () => picker.click() }, t("prefsImport")),
+        resetButton(),
+        h("button", { class: "sbtn", type: "button", onclick: () => close() }, t("prefsClose")),
+        h("button", { class: "sbtn", type: "submit" }, t("save"))),
+      picker);
     close = overlays.open({ key: "prefs", name: t("menuPreferences"), body: form });
   }
 
