@@ -46,7 +46,7 @@ function promoSvg() {
   <rect width="440" height="280" fill="url(#bg)"/>
   <g transform="translate(36 80) scale(1.2)">${artwork(false)}</g>
   <text x="178" y="136" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="44" font-weight="bold" fill="${C.text}">termtab</text>
-  <text x="180" y="168" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" fill="${C.green}">Your new tab, as a macOS Terminal</text>
+  <text x="180" y="168" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" fill="${C.green}">A macOS Terminal dashboard</text>
   <text x="180" y="192" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#8a8a8a">free · no permissions to fear</text>
 </svg>
 `;

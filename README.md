@@ -1,12 +1,16 @@
 # termtab (working name)
 
-**Your new tab, as a macOS Terminal — free, no permissions to fear.**
+**Your dashboard, as a macOS Terminal — free, no permissions to fear.**
 
-termtab is a Chrome extension that replaces the new tab page with a macOS desktop: a menu bar on top and every widget in its own Terminal window, with traffic lights that work, a `you — weather — zsh — 80×24` title and a zsh prompt line. Pick the widgets you want, drag windows to reorder them, and the layout is remembered.
+termtab is a Chrome extension that opens a dashboard in its own window, made to sit on your second monitor: a macOS desktop with a menu bar on top and every widget in its own Terminal window, with traffic lights that work, a `you — weather — zsh — 80×24` title and a zsh prompt line. Pick the widgets you want, drag windows to reorder them, and the layout is remembered. Your new tab page stays Chrome's own.
 
 ![termtab main layout](store/main.png)
 
 Chrome Web Store: coming soon.
+
+## Open the dashboard
+
+Click the termtab icon in the toolbar, or press `Alt+Shift+T` (change it at `chrome://extensions/shortcuts`). The dashboard opens as an app-style window with no address bar. Drag it to any monitor and resize it; termtab remembers where it was and opens it there next time. If it is already open, the icon or the shortcut brings it to the front instead of opening another.
 
 ## Widgets
 
@@ -44,14 +48,14 @@ Above the grid: a greeting and a "today's focus" line that clears each day.
 
 ## Everything is free
 
-There is no paid tier and nothing is locked. Features other new-tab extensions charge for are free here: the pomodoro timer, several to-do lists, ambient sound, focus mode, world clocks and countdowns.
+There is no paid tier and nothing is locked. Features other dashboard extensions charge for are free here: the pomodoro timer, several to-do lists, ambient sound, focus mode, world clocks and countdowns.
 
 ## Permissions
 
 | Permission | Why |
 |---|---|
 | `storage` | Keeps your layout, settings and cached widget data on your device |
-| `alarms` | Ends a focus session on time even when no new tab is open |
+| `alarms` | Ends a focus session on time even when the dashboard is closed |
 | `search` | Sends what you type in the search window to your own default search engine (the one set in Chrome) |
 | `system.cpu`, `system.memory` | The System monitor widget's CPU and memory bars |
 
@@ -59,7 +63,7 @@ None of these shows a warning when you install. There are no host permissions: e
 
 ## Privacy
 
-No accounts, no analytics, no tracking. Everything stays in `chrome.storage.local` on your device. Widgets that fetch data send only what that request needs (a city's coordinates for weather, the coins you picked for crypto), only while the widget is on and a new tab is open. Details per widget: [PRIVACY.md](PRIVACY.md).
+No accounts, no analytics, no tracking. Everything stays in `chrome.storage.local` on your device. Widgets that fetch data send only what that request needs (a city's coordinates for weather, the coins you picked for crypto), only while the widget is on and the dashboard is open. Details per widget: [PRIVACY.md](PRIVACY.md).
 
 ## Keyboard shortcuts
 
@@ -77,7 +81,7 @@ No accounts, no analytics, no tracking. Everything stays in `chrome.storage.loca
 1. Download or clone this repository.
 2. Open `chrome://extensions` and switch on **Developer mode**.
 3. Click **Load unpacked** and pick the repository folder.
-4. Open a new tab.
+4. Pin termtab to the toolbar (the puzzle-piece menu), then click its icon or press `Alt+Shift+T` to open the dashboard.
 
 ## Development
 
@@ -100,10 +104,11 @@ npm run icons         # icons/icon-*.png and store/promo-440x280.png from the SV
 
 ## 한국어
 
-**새 탭을 macOS 터미널처럼. 전부 무료, 걱정할 권한도 없어요.**
+**macOS 터미널 스타일 대시보드. 전부 무료, 걱정할 권한도 없어요.**
 
-termtab은 Chrome 새 탭을 macOS 데스크톱으로 바꿔 주는 확장 프로그램이에요. 시계, 집중 타이머, 할 일, 날씨, 뉴스 등 22개 위젯이 각각 터미널 윈도우로 열리고, 원하는 위젯만 골라 드래그로 배치할 수 있어요. 브라우저 언어가 한국어면 화면도 한국어로 나와요.
+termtab은 보조 모니터에 띄워 두기 좋은 대시보드를 별도 창으로 열어 주는 Chrome 확장 프로그램이에요. 새 탭은 Chrome 기본 그대로 두고요. 시계, 집중 타이머, 할 일, 날씨, 뉴스 등 22개 위젯이 각각 터미널 윈도우로 열리고, 원하는 위젯만 골라 드래그로 배치할 수 있어요. 브라우저 언어가 한국어면 화면도 한국어로 나와요.
 
+- 툴바의 termtab 아이콘을 누르거나 `Alt+Shift+T`를 누르면 열려요. 원하는 모니터로 옮기고 크기를 조절해 두면 다음에도 그 자리에 열려요. 이미 열려 있으면 새로 열지 않고 앞으로 가져와요.
 - 유료 플랜이 없어요. 뽀모도로, 여러 개의 할 일 목록, 배경 소리, 집중 모드, 세계 시계, 카운트다운까지 모두 무료예요.
 - 계정, 분석, 추적이 없어요. 데이터는 내 기기의 `chrome.storage.local`에만 저장돼요. 자세한 내용은 [PRIVACY.md](PRIVACY.md)를 보세요.
 - 설치할 때 권한 경고가 뜨지 않아요 (`storage`, `alarms`, `search`, `system.cpu`, `system.memory`).

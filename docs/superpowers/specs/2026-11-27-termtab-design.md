@@ -5,13 +5,13 @@ Status: approved by the owner on 2026-11-27. Working name `termtab`; the final n
 
 ## Intent
 
-A free Chrome extension that replaces the new tab page with a dashboard of widgets (clock, focus timer, to-do, weather, news, and more), drawn as a macOS desktop: a menu bar on top and each widget in its own macOS Terminal window with traffic-light buttons, a centered title like `you — weather — zsh — 80×24`, and a zsh prompt line (`you@MacBook ~ % weather seoul`). The user picks which widgets to show, drags windows to reorder them, and the layout is remembered.
+A free Chrome extension that opens a dashboard of widgets (clock, focus timer, to-do, weather, news, and more) in its own window, meant to stay open on a second monitor (it began as a new tab page; see Changes during implementation), drawn as a macOS desktop: a menu bar on top and each widget in its own macOS Terminal window with traffic-light buttons, a centered title like `you — weather — zsh — 80×24`, and a zsh prompt line (`you@MacBook ~ % weather seoul`). The user picks which widgets to show, drags windows to reorder them, and the layout is remembered.
 
 Why: the owner's earlier projects (GitHub README tools) only reach GitHub users and were hard to grow. This tests the Chrome Web Store as a channel with something anyone can use. The terminal look is the hook ("makes your browser look like a developer's"), the widgets are the reason to keep it. A mockup was approved on 2026-11-27; a copy is in `docs/mockup/terminal-newtab.html`. **The mockup is the reference for how each widget looks** (layouts of the timer, weather, neofetch and so on); this document wins on behavior, data and anything the mockup fakes.
 
 ## Goals
 
-- Open instantly on every new tab with the user's chosen widgets.
+- Open instantly, from the toolbar button or `Alt+Shift+T`, in a dashboard window with the user's chosen widgets.
 - Let the user add and remove widgets from a list, reorder them by dragging, and keep that layout.
 - Feel like macOS Terminal: menu bar, traffic lights that work (red closes the widget, yellow minimizes it to its title bar, green toggles wide), rounded windows with shadows, SF Mono/Menlo, zsh prompt lines.
 - Install with no permission warnings.
@@ -29,14 +29,14 @@ Why: the owner's earlier projects (GitHub README tools) only reach GitHub users 
 
 ## Anti-goals (failure even if it works)
 
-- A new tab that waits on the network. The page must render from saved data first; fetching happens after and updates in place.
+- A dashboard that waits on the network. The page must render from saved data first; fetching happens after and updates in place.
 - Any install permission warning.
 - Sending anything about the user anywhere except the minimum a widget needs to fetch its data (a city's coordinates for weather, a GitHub username for the graph), and only while that widget is on.
 - Text that glows, flickers or is hard to read.
 
 ## Constraints
 
-- Manifest V3, `chrome_url_overrides.newtab`.
+- Manifest V3; the dashboard page (`newtab.html`) opens in a popup window from the toolbar action (no `chrome_url_overrides`).
 - Permissions: `storage`, `alarms`, `search`, `system.cpu`, `system.memory`. None shows an install warning; the implementation must confirm this for `system.*` by loading the packed extension, and drop the System monitor widget (and those two permissions) if Chrome shows any warning. (`notifications` is not requested; see the focus timer.)
 - No host permissions: every data source must allow cross-origin requests from an extension page. Checked on 2026-11-27 (all return `Access-Control-Allow-Origin`):
   - Open-Meteo forecast and geocoding (`api.open-meteo.com`, `geocoding-api.open-meteo.com`), no key
@@ -47,14 +47,13 @@ Why: the owner's earlier projects (GitHub README tools) only reach GitHub users 
   - DEV (`dev.to/api/articles`)
   - GitHub search (`api.github.com/search/repositories`), 10 requests/min unauthenticated
 - No remote code. Images may load from other origins (the GitHub graph widget shows an image from the owner's card service).
-- Chrome shows its own "Is this the new tab page you expected?" bubble after install; that is unavoidable for new-tab extensions.
 
 ## Approaches considered
 
 | | Approach | Trade-off | Decision |
 |---|---|---|---|
-| A | Plain MV3, ES modules, no build; each widget a module with a fixed interface; pure logic tested with `node --test` | Same approach as the owner's previous extension (terminal-skin, since deleted, so no code to copy; its lessons are written into Testing and Release below); small, fast new tab; drag and drop written by hand | **Chosen** (builder's call) |
-| B | WXT + a UI framework | Comfortable for many widgets; bigger bundle on every new tab, more tooling | Not now |
+| A | Plain MV3, ES modules, no build; each widget a module with a fixed interface; pure logic tested with `node --test` | Same approach as the owner's previous extension (terminal-skin, since deleted, so no code to copy; its lessons are written into Testing and Release below); small, fast page; drag and drop written by hand | **Chosen** (builder's call) |
+| B | WXT + a UI framework | Comfortable for many widgets; bigger bundle on every page load, more tooling | Not now |
 | C | Bundle a drag-and-drop/grid library | Faster drag-and-drop; extra weight for one feature | Rejected; drag is ~150 lines |
 
 ## How it works
@@ -125,8 +124,8 @@ The search bar is always first and cannot be removed.
 
 ### Data and caching
 
-- `cache.get(key, ttl, fetcher)` returns the saved value at once (even if stale) and, when older than `ttl`, fetches in the background and re-renders that one widget. Fetches only happen while a new tab is open; there is no background polling.
-- Concurrent new tabs share one in-flight fetch per key (a Web Locks API lock, `navigator.locks`, atomic across every page of the extension origin).
+- `cache.get(key, ttl, fetcher)` returns the saved value at once (even if stale) and, when older than `ttl`, fetches in the background and re-renders that one widget. Fetches only happen while the dashboard is open; there is no background polling.
+- Concurrent dashboard pages share one in-flight fetch per key (a Web Locks API lock, `navigator.locks`, atomic across every page of the extension origin).
 - On failure the widget keeps the old data and shows `fetch failed · retry` in its status line; nothing else on the page is affected.
 - Weather location: a city search box using Open-Meteo geocoding, no location permission.
 
@@ -159,8 +158,8 @@ The to-do widget keeps several named lists (`todo work`, `todo home`), switched 
 
 ### Focus timer across tabs
 
-- State `{ mode: focus|break, endsAt | remaining, running, doneToday, day }` lives in storage, so every new tab shows the same countdown.
-- `background.js` sets a `chrome.alarms` alarm for `endsAt`. When it fires: switch mode, increase the count, and set the toolbar badge (`✓`, cleared on the next new tab; the manifest has an `action` key so the badge has a toolbar button). If a new tab is open it also plays a short chime (only after the user has interacted with the page, per autoplay rules).
+- State `{ mode: focus|break, endsAt | remaining, running, doneToday, day }` lives in storage, so every open dashboard page shows the same countdown.
+- `background.js` sets a `chrome.alarms` alarm for `endsAt`. When it fires: switch mode, increase the count, and set the toolbar badge (`✓`, cleared when the dashboard next opens; the manifest has an `action` key so the badge has a toolbar button). If the dashboard is open it also plays a short chime (only after the user has interacted with the page, per autoplay rules).
 - No system notifications in v1, to keep the install free of warnings.
 
 ### Visual design
@@ -178,7 +177,7 @@ The to-do widget keeps several named lists (`todo work`, `todo home`), switched 
 
 ### Testing
 
-- `node --test`: layout operations, cache TTL decisions, timer state machine, date helpers, every widget's `parse` against fixture JSON, locale key coverage, manifest test (permissions exactly `storage`, `alarms`, `system.cpu`, `system.memory`; `newtab` override; every file exists), zip writer (crc32, deflate round trip) and a package test (every file reachable from newtab.html, newtab.js and background.js is in the zip).
+- `node --test`: layout operations, cache TTL decisions, timer state machine, date helpers, every widget's `parse` against fixture JSON, locale key coverage, manifest test (permissions exactly `storage`, `alarms`, `system.cpu`, `system.memory`; no `newtab` override, an `Alt+Shift+T` shortcut for the toolbar action; every file exists), zip writer (crc32, deflate round trip) and a package test (every file reachable from newtab.html, newtab.js and background.js is in the zip).
 - `?demo=1` loads bundled sample data for every widget; a screenshot script renders the page from it for review and store images. It drives headless Edge over the DevTools protocol (seed `chrome.storage.local`, reload, wait, `Page.captureScreenshot`), because headless `--screenshot` does not wait for storage or async rendering. Lessons from the previous extension: use Edge or Chrome for Testing (branded Chrome ignores `--load-extension`), a fresh browser profile per run (Edge disables command-line extensions in a reused profile), and a timeout per page.
 - GitHub Actions runs the Node tests.
 
@@ -202,17 +201,18 @@ The to-do widget keeps several named lists (`todo work`, `todo home`), switched 
 - A tab left open stays current: the grid reloads every online widget when the page becomes visible and every 60 s while it is visible (only stale cache entries hit the network).
 - Optional widget hook `cacheKey(settings, now) → string`, appended to the cache key. On this day uses the local `YYYY-MM-DD`, so it turns over at midnight despite its 24 h TTL; the calendar redraws when the local day changes.
 - `meta.usesPrefs: true` (clock, world clocks, system info, focus timer): only these re-render on a prefs change; every other window just gets its title and prompt line redrawn, so ambient sound and typed input survive. A search-engine change redraws no window.
-- Error backoff: a failed fetch is stored with `failedAt` and counts as fresh for 60 s, so new tabs do not hammer a source that is down or rate limiting; the retry button passes `force` to bypass it.
+- Error backoff: a failed fetch is stored with `failedAt` and counts as fresh for 60 s, so reopening the dashboard does not hammer a source that is down or rate limiting; the retry button passes `force` to bypass it.
 - One failing currency, unknown coin or failing Hacker News story no longer fails its widget (`Promise.allSettled`; "n/a" / "unknown coin" rows). Exchange-rate settings accept only the currencies Frankfurter serves (bundled list).
 - Focus mode switched off restores the news windows (at once, and again when the session ends).
-- Clicking the toolbar button opens a new tab (`chrome.action.onClicked`, no extra permission).
+- Clicking the toolbar button opened a new tab (`chrome.action.onClicked`, no extra permission); superseded by the dashboard window below.
 - `?demo=1` shows fixed System info values for the store screenshots.
 - Import also rejects duplicate layout ids and malformed calculator history; import merges into the current settings (the Preferences window says so).
+- Dashboard window instead of a new tab override (v0.2.0): the owner wants to keep the dashboard open on one monitor of a multi-monitor setup, not to have it replace every new tab, and Chrome offers no way to let the user switch a new tab override on or off. So `chrome_url_overrides` is gone. The toolbar button, and the `_execute_action` command with suggested key `Alt+Shift+T`, open `newtab.html` (name kept to avoid churn) as a `type: "popup"` window (no address bar), or focus it when it is already open (its id in `chrome.storage.session` `dashWindow`, checked with `chrome.windows.get`). Its bounds are saved to `chrome.storage.local` `dashBounds` on `windows.onBoundsChanged` (debounced) and reused, default 1280×860; Chrome clamps bounds left on an unplugged monitor. The windows API needs no permission, so the permission list is unchanged. Chrome's "Is this the new tab page you expected?" bubble no longer appears.
 
 ## Decided by the owner
 
 - A Chrome extension, as an experiment with the Chrome Web Store.
-- New tab page dashboard with as many widgets as possible, chosen by the user.
+- New tab page dashboard with as many widgets as possible, chosen by the user. (Changed by the owner in v0.2.0: a dashboard window for a second monitor, not a new tab page.)
 - macOS Terminal look, used with clicks, not commands.
 - Drag to reorder.
 - Take the good ideas from similar extensions and give everything away free.

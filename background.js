@@ -1,4 +1,4 @@
-// Service worker: focus-timer alarm, toolbar badge, focus mode and the toolbar button. All listeners are
+// Service worker: focus-timer alarm, toolbar badge, focus mode and the dashboard window. All listeners are
 // registered at the top level so Chrome can wake the worker for them.
 import { createBackground } from "./lib/bg.js";
 import { defaultLayout } from "./lib/layout.js";
@@ -15,5 +15,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
 chrome.alarms.onAlarm.addListener((alarm) => log(bg.onAlarm(alarm)));
 chrome.runtime.onStartup.addListener(() => log(bg.onStartup()));
 chrome.runtime.onInstalled.addListener(() => log(bg.onStartup()));
-// The toolbar button has no popup: a click opens a new tab (no permission needed).
-chrome.action?.onClicked?.addListener(() => log(Promise.resolve().then(() => chrome.tabs.create({}))));
+// The toolbar button (and its Alt+Shift+T shortcut) has no popup: a click opens the dashboard
+// window, or focuses it when it is already open. The windows API needs no permission.
+chrome.action?.onClicked?.addListener(() => log(bg.openDashboard()));
+chrome.windows?.onBoundsChanged?.addListener((w) => log(bg.onBoundsChanged(w)));
+chrome.windows?.onRemoved?.addListener((id) => log(bg.onWindowRemoved(id)));
