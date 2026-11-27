@@ -1,4 +1,4 @@
-// New tab page: wires the menu bar, greeting, search, window grid, drawer, drag and shortcuts.
+// Dashboard page (opened in its own window by the toolbar button): wires the menu bar, greeting, search, window grid, drawer, drag and shortcuts.
 // chrome.* is only touched through guarded accessors, so the page also opens outside the
 // extension (plain browser preview: localStorage instead of chrome.storage, English strings).
 import { createStore } from "./lib/store.js";
@@ -142,7 +142,7 @@ async function main() {
     }
   });
 
-  // focus timer: the badge (✓) is cleared by opening a new tab; a session that ends while
+  // focus timer: the badge (✓) is cleared by opening the dashboard; a session that ends while
   // this page is open plays a chime, once the page has had a user gesture (autoplay rules)
   globalThis.chrome?.action?.setBadgeText?.({ text: "" })?.catch?.(() => {});
   let gesture = false;

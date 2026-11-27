@@ -1,4 +1,4 @@
-// A short two-note chime when a focus session ends while a new tab is open. Browsers only
+// A short two-note chime when a focus session ends while the dashboard is open. Browsers only
 // let a page play sound after the user has interacted with it, so the page tracks the
 // first pointerdown/keydown and calls playChime only after that.
 

@@ -3,7 +3,7 @@ import { $, prompt, title, today } from "./dom.js";
 import { greeting } from "../lib/dates.js";
 
 // Web search goes to the user's own default engine through chrome.search (Chrome Web Store
-// policy for new tab pages). GitHub is the one platform search offered next to it.
+// policy for search on extension pages; termtab began as a new tab page). GitHub is the one platform search offered next to it.
 export const GITHUB_SEARCH = "https://github.com/search?q=";
 export const engineId = (v) => (v === "github" ? "github" : "default");
 

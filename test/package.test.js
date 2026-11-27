@@ -41,7 +41,7 @@ test('every file reachable from newtab.html, newtab.js and background.js is pack
 test('the manifest, its icons, locales and LICENSE are packaged', () => {
   const files = new Set(packageFiles(root));
   const manifest = JSON.parse(read('manifest.json'));
-  for (const f of ['manifest.json', 'LICENSE', '_locales/en/messages.json', '_locales/ko/messages.json', ...Object.values(manifest.icons)]) {
+  for (const f of ['manifest.json', 'newtab.html', 'LICENSE', '_locales/en/messages.json', '_locales/ko/messages.json', ...Object.values(manifest.icons)]) {
     assert.ok(files.has(f), `missing ${f}`);
   }
 });

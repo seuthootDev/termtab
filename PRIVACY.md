@@ -6,7 +6,7 @@ termtab does not collect, sell or share any data about you.
 
 - **No accounts, no analytics, no tracking.** termtab has no server of its own and sends nothing to its developer.
 - **Your data stays on your device.** Your layout, preferences, to-do lists, notes, habits, countdowns and cached widget data are stored in `chrome.storage.local` in your browser. They are not synced and not uploaded anywhere.
-- **Requests only for widgets you turn on.** A widget that shows online data (weather, news, prices) fetches it straight from that data source, only while the widget is on your new tab and only while a new tab is open. There is no background polling. Widgets you have not added make no requests.
+- **Requests only for widgets you turn on.** A widget that shows online data (weather, news, prices) fetches it straight from that data source, only while the widget is on your dashboard and only while the dashboard is open. There is no background polling. Widgets you have not added make no requests.
 - **Export files stay local.** Preferences → Export settings saves a JSON file to your computer. termtab never uploads it; importing reads a file you pick and changes nothing if it is not a valid termtab backup.
 
 ## What each widget sends
