@@ -32,6 +32,18 @@ test("daysUntil rounds up to local midnight", () => {
   assert.equal(D.daysUntil("2026-11-27", new Date(2026, 10, 27, 10, 0)), 0);
 });
 
+test("daysUntil counts calendar days across DST changes", () => {
+  // US spring-forward 2026-03-08, fall-back 2026-11-01; EU 2026-03-29 / 2026-10-25
+  const at = (y, m, d, h) => new Date(y, m, d, h, 30);
+  assert.equal(D.daysUntil("2026-03-09", at(2026, 2, 7, 23)), 2);
+  assert.equal(D.daysUntil("2026-03-30", at(2026, 2, 28, 0)), 2);
+  assert.equal(D.daysUntil("2026-11-02", at(2026, 9, 31, 0)), 2);
+  assert.equal(D.daysUntil("2026-11-02", at(2026, 9, 31, 23)), 2);
+  assert.equal(D.daysUntil("2026-10-26", at(2026, 9, 24, 23)), 2);
+  assert.equal(D.daysUntil("2026-11-01", at(2026, 10, 1, 12)), 0);
+  assert.equal(D.daysUntil("2026-11-26", at(2026, 10, 27, 12)), -1);
+});
+
 test("workdayProgress", () => {
   const cfg = { start: "09:00", end: "18:00", days: [1, 2, 3, 4, 5] };
   const fri = (h, m = 0) => new Date(2026, 10, 27, h, m);
