@@ -17,7 +17,7 @@ Chrome Web Store: coming soon.
 | basics | Clock: big digits, date, ISO week | your computer |
 | basics | Links: your own list of sites, with favicons | stored in the extension; icons from Google's favicon service |
 | basics | Calculator: `bc`-style, keeps your last 5 results | your computer |
-| basics | Search window (Google, DuckDuckGo, Naver, GitHub), always first | the engine you pick, when you press Enter |
+| basics | Search window (Google, DuckDuckGo, Naver, GitHub): always on above the grid, not a widget | the engine you pick, when you press Enter |
 | focus | Focus timer: 25/5 pomodoro, today's count, shared across tabs | your computer |
 | focus | To-do: several named lists (`todo work`, `todo home`) | stored in the extension |
 | focus | Notes: a scratchpad that saves as you type | stored in the extension |

@@ -63,3 +63,21 @@ test("t() falls back to _locales/en in Node and fills $1", async () => {
   assert.equal(t("greetMorning", "ann"), en.greetMorning.message.replace("$1", "ann"));
   assert.equal(t("noSuchKey"), "noSuchKey");
 });
+
+test("README: the widget count matches the widget rows and the registry (search is not a widget)", async () => {
+  const { WIDGETS } = await import("../widgets/index.js");
+  const readme = read("README.md").replace(/\r\n/g, "\n");
+  const en = readme.split("## 한국어")[0];
+  const rows = en.split("\n").filter((l) => /^\| (basics|focus|info|news|fun) \|/.test(l));
+  const widgetRows = rows.filter((l) => !/not a widget/.test(l));
+  const count = Number(en.match(/(\d+) widgets in five groups/)[1]);
+  assert.equal(widgetRows.length, count);
+  assert.equal(count, WIDGETS.length);
+  assert.ok(readme.includes(`${count}개 위젯`), "Korean section uses the same count");
+});
+
+test("Preferences say that import merges into the current settings (en and ko)", () => {
+  assert.match(en.prefsImportNote.message, /merges/);
+  assert.match(ko.prefsImportNote.message, /합쳐요/);
+  assert.match(read("shell/panels.js"), /t\("prefsImportNote"\)/);
+});

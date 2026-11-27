@@ -7,8 +7,16 @@ import { DEMO } from "../demo/data.js";
 import { createSaveTracker } from "./save-tracker.js";
 
 const DEFAULT_TTL = 15 * 60 * 1000;
+const REFRESH_MS = 60 * 1000;
 
-export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
+/** Storage key of a widget's cache entry: its settings hash, plus the module's cacheKey(settings, now)
+ *  when it has one (wiki: the local date, so "on this day" turns over at midnight). */
+export function cacheKeyFor(mod, id, settings, now = new Date()) {
+  const extra = typeof mod.cacheKey === "function" ? mod.cacheKey(settings, now) : "";
+  return `cache:${id}:${hash(settings)}${extra ? ":" + extra : ""}`;
+}
+
+export function createGrid({ grid, store, cache, demo, t, getPrefs, actions, doc = globalThis.document }) {
   const mounted = new Map(); // id → window state
   const name = (id) => t(`w_${id}_name`);
   const ownSaves = createSaveTracker();
@@ -73,14 +81,15 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
   }
 
   // Data flow: stored entry first (render at once), revalidate in the background.
-  async function load(m, force = false) {
+  // quiet: a background refresh that redraws only when the entry actually changed.
+  async function load(m, { force = false, quiet = false } = {}) {
     const { mod } = m;
     if (!mod.fetch) return render(m);
     if (demo) {
       m.entry = { value: DEMO[m.id] ?? null, fetchedAt: Date.now(), error: false };
       return render(m);
     }
-    const key = `cache:${m.id}:${hash(m.settings)}`;
+    const key = cacheKeyFor(mod, m.id, m.settings);
     if (m.cacheKey !== key) {
       m.unsubCache?.();
       m.cacheKey = key;
@@ -88,11 +97,14 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
       // Another tab may win the fetch lock; its result reaches us only through storage.
       m.unsubCache = store.onChange(key, (v) => update(m, key, v));
     }
-    const fetcher = () => mod.fetch(m.settings).then((raw) => mod.parse(raw));
-    const entry = await cache.get(key, force ? 0 : mod.ttlMs ?? DEFAULT_TTL, fetcher, (e) => update(m, key, e));
+    const settings = m.settings;
+    const fetcher = () => mod.fetch(settings).then((raw) => mod.parse(raw, settings));
+    const entry = await cache.get(key, mod.ttlMs ?? DEFAULT_TTL, fetcher, (e) => update(m, key, e), { force });
     if (m.cacheKey === key && mounted.get(m.id) === m) {
+      const before = m.entry;
       // keep a newer entry that already arrived through onChange/onUpdate
       if (!m.entry || (entry && entry.fetchedAt >= m.entry.fetchedAt)) m.entry = entry;
+      if (quiet && before && m.entry && before.fetchedAt === m.entry.fetchedAt && before.error === m.entry.error) return;
       render(m);
     }
   }
@@ -114,7 +126,7 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
     const error = !!m.entry?.error;
     m.status.hidden = !error;
     m.status.replaceChildren(...(error
-      ? [t("fetchFailed"), " · ", h("button", { type: "button", onclick: () => load(m, true) }, t("retry"))]
+      ? [t("fetchFailed"), " · ", h("button", { type: "button", onclick: () => load(m, { force: true }) }, t("retry"))]
       : []));
     const ctx = {
       settings: m.settings,
@@ -122,7 +134,8 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
       error,
       t,
       prefs,
-      refresh: () => load(m, true),
+      demo: !!demo,
+      refresh: () => load(m, { force: true }),
       // The widget already shows what it saves, so its own save does not re-render it
       // (that would drop the caret); pass { rerender: true } to redraw anyway.
       save: (settings, opts) => saveSettings(m.id, settings, { rerender: !!opts?.rerender }),
@@ -159,6 +172,31 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
       h("div", { class: "pb" }, h("div", { class: "cmd" }, prompt(prefs, "widgets --list")), t("emptyGrid"), " ", h("span", { class: "cursor" })));
   }
 
+  // A tab left open keeps its online data current: reload on becoming visible and every minute
+  // while visible. cache.get only hits the network when the entry is stale, so this stays cheap.
+  function refreshOnline() {
+    if (demo) return;
+    for (const m of mounted.values()) if (m.mod.fetch) load(m, { quiet: true }).catch((err) => console.error(err));
+  }
+  let timer = null;
+  const startTimer = () => (timer ??= setInterval(refreshOnline, REFRESH_MS));
+  const stopTimer = () => {
+    clearInterval(timer);
+    timer = null;
+  };
+  function onVisibility() {
+    if (doc.visibilityState === "visible") {
+      refreshOnline();
+      startTimer();
+    } else stopTimer();
+  }
+  doc?.addEventListener?.("visibilitychange", onVisibility);
+  if (doc?.visibilityState !== "hidden") startTimer();
+
+  function promptLine(m) {
+    m.cmd.replaceChildren(prompt(getPrefs(), m.mod.meta.command(m.settings)));
+  }
+
   async function saveSettings(id, settings, { rerender = true } = {}) {
     const m = mounted.get(id);
     const next = { ...(m?.mod.defaults ?? byId(id)?.defaults), ...settings };
@@ -168,7 +206,7 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
       if (rerender) applySettings(m, next);
       else {
         m.settings = next;
-        m.cmd.replaceChildren(prompt(getPrefs(), m.mod.meta.command(next))); // e.g. `todo home`
+        promptLine(m); // e.g. `todo home`
       }
     }
     await store.set("settings:" + id, next);
@@ -190,10 +228,19 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
       });
       if (!items.length) grid.append((empty = emptyWindow()));
     },
-    /** Prefs changed (user, machine, clock): redraw every title and prompt. */
+    /** Prefs changed (user, machine, clock): redraw every title and prompt line; fully re-render
+     *  only widgets whose meta.usesPrefs is set (the others keep their state: sound, typed input). */
     rerenderAll(layout) {
-      this.sync(layout);
-      for (const m of mounted.values()) render(m);
+      this.sync(layout); // also redraws the titles and the empty window
+      for (const m of mounted.values()) {
+        if (m.mod.meta.usesPrefs) render(m);
+        else promptLine(m);
+      }
+    },
+    /** Remove the refresh listener and interval. */
+    destroy() {
+      doc?.removeEventListener?.("visibilitychange", onVisibility);
+      stopTimer();
     },
     /** Resolves when the window's first render is done. */
     ready: (id) => mounted.get(id)?.ready ?? Promise.resolve(),

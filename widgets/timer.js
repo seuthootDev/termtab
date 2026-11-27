@@ -25,7 +25,7 @@ export function announceFocusStart(state, prefs) {
 }
 
 export default {
-  meta: { id: "timer", category: "focus", size: "small", source: "src_computer", command: () => "focus 25m" },
+  meta: { id: "timer", category: "focus", size: "small", source: "src_computer", command: () => "focus 25m", usesPrefs: true },
   defaults: {},
   render(el, ctx) {
     const { t } = ctx;

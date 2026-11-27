@@ -6,10 +6,10 @@ import { formatClock } from "../widgets/clock.js";
 import { faviconUrl, isSafeUrl, sanitizeLinks, parseLinks } from "../widgets/links.js";
 import { formatZone, zoneLabel } from "../widgets/world.js";
 import { countdownLabel } from "../widgets/countdown.js";
-import { pushHistory, runCalc } from "../widgets/calculator.js";
+import { pushHistory, runCalc, validHistory } from "../widgets/calculator.js";
 import { FORTUNES } from "../data/fortunes.js";
 import { cowsay } from "../widgets/fortune.js";
-import { countTabs, osName, browserName } from "../widgets/sysinfo.js";
+import { countTabs, osName, browserName, sysFacts, SYS_LABEL_STYLE } from "../widgets/sysinfo.js";
 import { validateWorkday } from "../widgets/workday.js";
 import { calendarCells } from "../widgets/calendar.js";
 
@@ -127,4 +127,20 @@ test("newtab.css gives pre/code the mono stack (no browser default monospace, wh
   const rule = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)].find(([, sel, body]) =>
     /(^|,)\s*pre\s*(,|$)/.test(sel.trim()) && /font-family:\s*var\(--mono\)|font:\s*inherit/.test(body));
   assert.ok(rule, "a rule for pre with font-family: var(--mono) or font: inherit");
+});
+
+test("calculator drops invalid stored history entries at render", () => {
+  assert.deepEqual(validHistory([{ expr: "1+1", result: "2" }, null, { expr: "x" }, { expr: 3, result: "3" }, { expr: "2*3", result: 6 }, "junk"]),
+    [{ expr: "1+1", result: "2" }, { expr: "2*3", result: 6 }]);
+  assert.deepEqual(validHistory("not an array"), []);
+  assert.deepEqual(validHistory(undefined), []);
+});
+
+test("sysinfo: ?demo=1 shows fixed values (store screenshots), labels keep their padding", () => {
+  const nav = { userAgent: "Mozilla/5.0 (Windows NT 10.0) Chrome/131 Edg/131", language: "en-US", hardwareConcurrency: 16 };
+  const scr = { width: 1600, height: 1000 };
+  assert.deepEqual(sysFacts({ nav, scr, demo: true }), { os: "macOS", browser: "Chrome", lang: "en-US", screen: "2560×1600", cores: "10", tabs: 12 });
+  const real = sysFacts({ nav, scr, demo: false });
+  assert.deepEqual(real, { os: "Windows", browser: "Edge", lang: "en-US", screen: "1600×1000", cores: "16", tabs: null });
+  assert.match(SYS_LABEL_STYLE, /white-space:\s*pre/);
 });

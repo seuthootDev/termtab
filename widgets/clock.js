@@ -17,7 +17,7 @@ export function formatClock(date, clock24, lang) {
 }
 
 export default {
-  meta: { id: "clock", category: "basics", size: "small", source: "src_computer", command: () => "date" },
+  meta: { id: "clock", category: "basics", size: "small", source: "src_computer", command: () => "date", usesPrefs: true },
   defaults: {},
   render(el, ctx) {
     const lang = globalThis.navigator?.language;

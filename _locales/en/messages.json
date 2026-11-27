@@ -676,5 +676,17 @@
   },
   "importTooLarge": {
     "message": "That file is too large (over 1 MB). Nothing was changed."
+  },
+  "rateNA": {
+    "message": "n/a"
+  },
+  "ratesUnsupported": {
+    "message": "Frankfurter has no rates for: $1"
+  },
+  "cryptoUnknown": {
+    "message": "unknown coin"
+  },
+  "prefsImportNote": {
+    "message": "Import merges the file into your current settings: anything the file leaves out stays as it is."
   }
 }

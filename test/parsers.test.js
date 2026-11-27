@@ -3,8 +3,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import weather, { buildUrl as weatherUrl, wmo, geocodeUrl } from "../widgets/weather.js";
-import rates, { buildUrl as ratesUrl, rateText } from "../widgets/rates.js";
-import crypto, { buildUrl as cryptoUrl } from "../widgets/crypto.js";
+import rates, { buildUrl as ratesUrl, rateText, validateRates } from "../widgets/rates.js";
+import { CURRENCIES } from "../widgets/currencies.js";
+import crypto, { buildUrl as cryptoUrl, changeText } from "../widgets/crypto.js";
 import hn, { buildUrl as hnUrl, itemUrl } from "../widgets/hn.js";
 import devto, { buildUrl as devtoUrl } from "../widgets/devto.js";
 import trending, { buildUrl as trendingUrl } from "../widgets/trending.js";
@@ -194,4 +195,67 @@ test("noData: loading line without error, nothing when the fetch failed, false w
   assert.equal(noData(b, { data: null, error: true, t }), true);
   assert.equal(b.kids.length, 0);
   assert.equal(noData(mk(), { data: {}, error: false, t }), false);
+});
+
+// ---------- one bad currency, coin or story must not break the whole widget ----------
+const withFetch = async (impl, fn) => {
+  const real = globalThis.fetch;
+  globalThis.fetch = impl;
+  try { return await fn(); } finally { globalThis.fetch = real; }
+};
+const okJson = (body) => ({ ok: true, status: 200, json: async () => body });
+
+test("rates: one failing currency renders n/a, the others still show; all failing throws", async () => {
+  const body = (from) => ({ amount: 1, base: from, date: "2026-11-26", rates: { KRW: from === "JPY" ? 8.4 : 1344.6 } });
+  const impl = async (url) => {
+    const from = new URL(url).searchParams.get("from");
+    return from === "XAU" ? { ok: false, status: 404 } : okJson(body(from));
+  };
+  const s = { base: "KRW", targets: ["USD", "XAU", "JPY"] };
+  const d = rates.parse(await withFetch(impl, () => rates.fetch(s)));
+  assert.equal(d.base, "KRW");
+  assert.deepEqual(d.rows.map((r) => [r.code, r.failed ?? false]), [["USD", false], ["XAU", true], ["JPY", false]]);
+  const t = (k) => ({ rateNA: "n/a" })[k] ?? k;
+  assert.equal(rateText(d.rows[1], d.base, "en", t), "1 XAU = n/a");
+  assert.equal(rateText(d.rows[0], d.base, "en", t), "1 USD = 1,345 KRW");
+  await assert.rejects(withFetch(async () => ({ ok: false, status: 404 }), () => rates.fetch(s)), /http 404/);
+  assert.throws(() => rates.parse([{ failed: "XAU" }, { failed: "XAG" }]), Error);
+});
+
+test("rates settings: unsupported currencies are rejected, targets de-duplicated", () => {
+  assert.ok(CURRENCIES.includes("KRW") && CURRENCIES.includes("USD") && CURRENCIES.length >= 25);
+  assert.ok(!CURRENCIES.includes("XAU"));
+  assert.deepEqual(validateRates("krw", "usd, JPY usd,eur"), { ok: true, base: "KRW", targets: ["USD", "JPY", "EUR"] });
+  assert.deepEqual(validateRates("KRW", "USD KRW"), { ok: true, base: "KRW", targets: ["USD"] });
+  assert.deepEqual(validateRates("KRW", "USD, XAU"), { ok: false, error: "unsupported", codes: ["XAU"] });
+  assert.deepEqual(validateRates("ABC", "USD"), { ok: false, error: "unsupported", codes: ["ABC"] });
+  assert.deepEqual(validateRates("KR", "USD"), { ok: false, error: "format" });
+  assert.deepEqual(validateRates("KRW", ""), { ok: false, error: "format" });
+  assert.deepEqual(validateRates("KRW", "KRW"), { ok: false, error: "format" });
+});
+
+test("crypto: unknown coins are marked, known ones kept; none known throws; missing 24h change shows —", () => {
+  const settings = { coins: ["bitcoin", "notacoin", "ethereum"], vs: "usd" };
+  const d = crypto.parse({ bitcoin: { usd: 61340, usd_24h_change: 0.8 }, ethereum: { usd: 1727.25 } }, settings);
+  assert.equal(d.vs, "usd");
+  assert.deepEqual(d.coins.map((c) => [c.id, !!c.unknown]), [["bitcoin", false], ["ethereum", false], ["notacoin", true]]);
+  assert.equal(d.coins.find((c) => c.id === "ethereum").change, null);
+  assert.equal(changeText(null), "—");
+  assert.equal(changeText(0.81), "+0.8%");
+  assert.equal(changeText(-1.25), "-1.3%");
+  assert.throws(() => crypto.parse({}, settings), Error);
+});
+
+test("hn: a failing item is skipped; the id list failing or every item failing throws", async () => {
+  const item = (id) => ({ id, title: `story ${id}`, url: `https://e.com/${id}`, score: 1, descendants: 0 });
+  const impl = async (url) => {
+    if (url.endsWith("topstories.json")) return okJson([1, 2, 3]);
+    const id = Number(url.match(/item\/(\d+)/)[1]);
+    return id === 2 ? { ok: false, status: 500 } : okJson(item(id));
+  };
+  const d = hn.parse(await withFetch(impl, () => hn.fetch({ count: 3 })));
+  assert.deepEqual(d.map((s) => s.id), [1, 3]);
+  await assert.rejects(withFetch(async (url) => (url.endsWith("topstories.json") ? okJson([1, 2]) : { ok: false, status: 500 }),
+    () => hn.fetch({ count: 2 })), /http 500/);
+  await assert.rejects(withFetch(async () => ({ ok: false, status: 503 }), () => hn.fetch({ count: 2 })), /http 503/);
 });

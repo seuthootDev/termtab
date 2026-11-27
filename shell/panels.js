@@ -150,6 +150,7 @@ export function createPanels({ t, overlays, getPrefs, setPrefs, grid, byId, stor
       h("label", {}, t("prefsWorkEnd"), end),
       msg,
       h("hr", { class: "prefs-sep" }),
+      h("p", { class: "dim", style: "margin:0;font-size:11.5px" }, t("prefsImportNote")),
       h("div", { class: "acts" },
         h("button", { class: "sbtn", type: "button", onclick: () => doExport(say) }, t("prefsExport")),
         h("button", { class: "sbtn", type: "button", onclick: () => picker.click() }, t("prefsImport")),

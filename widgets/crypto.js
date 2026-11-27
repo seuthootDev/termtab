@@ -22,12 +22,17 @@ export function formatPrice(price, vs, lang) {
   }
 }
 
+/** Pure: "+0.8%" / "-1.3%", or "—" when CoinGecko sent no 24 h change. */
+export const changeText = (c) => (isNum(c) ? `${c >= 0 ? "+" : ""}${c.toFixed(1)}%` : "—");
+
 export default {
   meta: { id: "crypto", category: "info", size: "small", source: "src_coingecko", command: () => "coins" },
   defaults: { coins: ["bitcoin", "ethereum", "solana", "dogecoin"], vs: "usd" },
   ttlMs: 5 * 60 * 1000,
   fetch: (settings) => getJson(buildUrl(settings)),
-  parse(raw) {
+  // CoinGecko leaves unknown ids out of its answer: those come back as { id, unknown: true }.
+  // Throws only when no requested coin is known.
+  parse(raw, settings) {
     if (!isObj(raw)) throw bad("crypto");
     let vs = null;
     const coins = Object.entries(raw).map(([id, v]) => {
@@ -36,10 +41,11 @@ export default {
       if (!priceKey || !isNum(v[priceKey])) throw bad("crypto");
       vs = priceKey;
       const change = v[`${priceKey}_24h_change`];
-      return { id, price: v[priceKey], change: isNum(change) ? change : 0 };
+      return { id, price: v[priceKey], change: isNum(change) ? change : null };
     });
     if (!coins.length) throw bad("crypto");
-    return { vs, coins };
+    const missing = settings ? ids(settings).filter((id) => !Object.hasOwn(raw, id)) : [];
+    return { vs, coins: [...coins, ...[...new Set(missing)].map((id) => ({ id, unknown: true }))] };
   },
   render(el, ctx) {
     const { t, data: d } = ctx;
@@ -49,9 +55,10 @@ export default {
     const coins = [...d.coins].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
     el.append(h("ul", {}, ...coins.map((c) => h("li", { class: "row" },
       h("span", { class: "y" }, TICKER[c.id] ?? c.id.toUpperCase()),
-      h("span", { class: "num" }, formatPrice(c.price, d.vs, lang), " ",
-        h("span", { class: c.change >= 0 ? "g" : "r" },
-          `${c.change >= 0 ? "+" : ""}${c.change.toFixed(1)}%`))))));
+      c.unknown
+        ? h("span", { class: "dim" }, t("cryptoUnknown"))
+        : h("span", { class: "num" }, formatPrice(c.price, d.vs, lang), " ",
+          h("span", { class: !isNum(c.change) ? "dim" : c.change >= 0 ? "g" : "r" }, changeText(c.change)))))));
   },
   settingsForm(settings, t) {
     const coins = h("input", { class: "inp", type: "text", "aria-label": t("cryptoCoins") });

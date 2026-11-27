@@ -102,10 +102,10 @@ test('cache keeps the old value when the fetch fails', async () => {
 });
 
 test('failure with no old entry stores an empty error entry', async () => {
-  const { cache, store } = setup();
+  const { cache, store, clock } = setup();
   await cache.get(K, 1000, async () => { throw new Error('x'); }, () => {});
   await cache.pending(K);
-  assert.deepEqual(await store.get(K), { value: null, fetchedAt: 0, error: true });
+  assert.deepEqual(await store.get(K), { value: null, fetchedAt: 0, error: true, failedAt: clock.t });
 });
 
 test('concurrent gets share one fetch', async () => {
@@ -150,7 +150,8 @@ test('a fetcher that never settles times out, keeps old value, can retry', async
   assert.equal(updates.length, 1);
   assert.equal(cache.pending(K), undefined);
   let calls = 0;
-  await cache.get(K, 1000, async () => { calls++; return 'new'; }, () => {});
+  // the retry button forces past the 60 s error backoff
+  await cache.get(K, 1000, async () => { calls++; return 'new'; }, () => {}, { force: true });
   await cache.pending(K);
   assert.equal(calls, 1);
   assert.equal((await store.get(K)).value, 'new');
@@ -200,4 +201,41 @@ test('pending is cleared after settle', async () => {
   await cache.get(K, 1000, async () => 'v', () => {});
   await cache.pending(K);
   assert.equal(cache.pending(K), undefined);
+});
+
+test('an error entry counts as fresh for 60 s (no refetch storm during a 429), then retries', async () => {
+  const { cache, store, clock } = setup();
+  let calls = 0;
+  const failing = async () => { calls++; throw new Error('429'); };
+  await cache.get(K, 60 * 60_000, failing, () => {});
+  await cache.pending(K);
+  assert.equal(calls, 1);
+  // ten more new tabs within the minute: no fetch
+  for (let i = 0; i < 10; i++) {
+    clock.t += 5_000;
+    const e = await cache.get(K, 60 * 60_000, failing, () => {});
+    assert.equal(e.error, true);
+    assert.equal(cache.pending(K), undefined, `tab ${i} started no fetch`);
+  }
+  clock.t += 11_000; // 61 s after the failure
+  await cache.get(K, 60 * 60_000, failing, () => {});
+  await cache.pending(K);
+  assert.equal(calls, 2);
+});
+
+test('force (the retry button) refetches an error entry inside the 60 s backoff, and a fresh entry', async () => {
+  const { cache, store, clock } = setup();
+  await store.set(K, { value: 'old', fetchedAt: clock.t - 10, error: true, failedAt: clock.t - 10 });
+  let calls = 0;
+  const ok = async () => { calls++; return 'new'; };
+  await cache.get(K, 60_000, ok, () => {});
+  assert.equal(cache.pending(K), undefined, 'not forced: backoff holds');
+  await cache.get(K, 60_000, ok, () => {}, { force: true });
+  await cache.pending(K);
+  assert.equal(calls, 1);
+  assert.equal((await store.get(K)).value, 'new');
+  assert.equal((await store.get(K)).error, false);
+  await cache.get(K, 60_000, ok, () => {}, { force: true });
+  await cache.pending(K);
+  assert.equal(calls, 2, 'force also bypasses a fresh entry');
 });

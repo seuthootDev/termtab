@@ -3,6 +3,13 @@ import { evaluate } from "../lib/calc.js";
 
 const KEYS = { syntax: "calcErrSyntax", "divide-by-zero": "calcErrDivide", "too-long": "calcErrTooLong" };
 
+/** One stored result: { expr: string, result: string | number }. */
+export const isHistoryEntry = (e) => e !== null && typeof e === "object" && !Array.isArray(e)
+  && typeof e.expr === "string" && (typeof e.result === "string" || (typeof e.result === "number" && Number.isFinite(e.result)));
+
+/** Pure: the valid entries of a stored history (junk in storage can't break the widget). */
+export const validHistory = (history) => (Array.isArray(history) ? history.filter(isHistoryEntry) : []);
+
 export const pushHistory = (history, entry, max = 5) => [...(Array.isArray(history) ? history : []), entry].slice(-max);
 
 /** Pure: evaluate, never throws. */
@@ -21,13 +28,13 @@ export default {
   meta: { id: "calculator", category: "basics", size: "small", source: "src_extension", command: () => "bc" },
   defaults: { history: [] },
   render(el, ctx) {
-    const history = Array.isArray(ctx.settings.history) ? ctx.settings.history : [];
+    const history = validHistory(ctx.settings.history);
     const input = h("input", { class: "inp", type: "text", autocomplete: "off", spellcheck: "false",
       placeholder: ctx.t("calcPlaceholder"), "aria-label": ctx.t("calcPlaceholder") });
     const out = h("div", {});
     const form = h("form", {}, input);
     el.append(
-      h("ul", {}, ...history.map((e) => h("li", { class: "row" }, h("span", { class: "dim" }, `${e.expr} =`), h("span", { class: "num g" }, e.result)))),
+      h("ul", {}, ...history.map((e) => h("li", { class: "row" }, h("span", { class: "dim" }, `${e.expr} =`), h("span", { class: "num g" }, String(e.result))))),
       form, out);
     form.addEventListener("submit", (e) => {
       e.preventDefault();

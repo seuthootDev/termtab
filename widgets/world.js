@@ -21,7 +21,7 @@ export function formatZone(date, tz, clock24) {
 const isZone = (tz) => !!formatZone(new Date(0), tz, true);
 
 export default {
-  meta: { id: "world", category: "info", size: "small", source: "src_computer", command: () => "tz --list" },
+  meta: { id: "world", category: "info", size: "small", source: "src_computer", command: () => "tz --list", usesPrefs: true },
   defaults: { zones: DEFAULT_ZONES },
   render(el, ctx) {
     const list = h("ul", {});

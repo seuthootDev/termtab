@@ -23,6 +23,8 @@ export default {
   meta: { id: "wiki", category: "news", size: "small", source: "src_wikimedia", command: () => "wiki onthisday" },
   defaults: { lang: "auto" },
   ttlMs: 24 * 60 * 60 * 1000,
+  // The feed is per local MM/DD: a new day needs a new cache entry, not yesterday's (24 h TTL).
+  cacheKey: (_settings, now = new Date()) => `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`,
   async fetch(settings, now = new Date()) {
     const lang = resolveLang(settings?.lang);
     try {

@@ -3,15 +3,21 @@
 //
 // Contract (see docs/superpowers/specs/2026-11-27-termtab-design.md, "Widget interface"):
 //   meta { id, category: "basics"|"focus"|"info"|"news"|"fun", size: "small"|"wide",
-//          source: <_locales key>, command(settings) → string }
+//          source: <_locales key>, command(settings) → string, usesPrefs?: true }
+//                                 usesPrefs: render reads ctx.prefs, so a prefs change re-renders the
+//                                 widget; every other widget only gets its title and prompt line redrawn.
 //   defaults                      the widget's settings
-//   render(el, ctx) → cleanup?    ctx = { settings, data, error, t, refresh(), save(settings, { rerender }?), prefs }
+//   render(el, ctx) → cleanup?    ctx = { settings, data, error, t, refresh(), save(settings, { rerender }?), prefs, demo }
 //                                 save() stores the settings without redrawing the window (the widget
 //                                 updates its own DOM); { rerender: true } redraws it.
 //                                 The shell already prints the prompt line
 //                                 (`<user>@<machine> ~ % <command>`) above `el`, and a
 //                                 "fetch failed · retry" status line when ctx.error is set.
-//   fetch(settings) → Promise<raw>, parse(raw) → data, ttlMs     online widgets only
+//   fetch(settings) → Promise<raw>, parse(raw, settings) → data, ttlMs     online widgets only
+//                                 The shell reloads online widgets when the tab becomes visible and every
+//                                 60 s while it is visible; the cache only fetches when the entry is stale.
+//   cacheKey(settings, now) → string   optional: appended to the cache key "cache:<id>:<hash(settings)>"
+//                                 for data that depends on more than the settings (wiki: the local date).
 //   settingsForm(settings, t) → HTMLElement dispatching a "save" CustomEvent (detail = settings)
 // Names and descriptions come from _locales: w_<id>_name, w_<id>_desc.
 

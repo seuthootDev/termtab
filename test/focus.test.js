@@ -90,6 +90,36 @@ test("bg: focus mode is applied only when the pref is on", async () => {
   assert.deepEqual(offAlarm.data.layout, LAYOUT);
 });
 
+test("bg: focus mode switched off mid-session still restores the news windows when the session ends", async () => {
+  const s = running();
+  const minimized = [LAYOUT[0], { id: "hn", wide: true, minimized: true, byFocus: true }];
+  const chrome = fakeChrome({ timer: s, layout: minimized, prefs: { focusMode: false } });
+  await createBackground({ chrome, now: () => T0 + 1500 * 1000, categoryById }).onAlarm({ name: "timer" });
+  assert.equal(chrome.data.timer.doneToday, 1);
+  assert.equal(chrome.data.layout[1].minimized, false);
+  assert.equal(chrome.data.layout[1].byFocus, undefined);
+
+  // a pause while the pref is off also restores
+  const paused = fakeChrome({ layout: minimized, prefs: { focusMode: false } });
+  await createBackground({ chrome: paused, now: () => T0, categoryById }).onTimerChange(timer.pause(s, T0 + 60000), s);
+  assert.equal(paused.data.layout[1].minimized, false);
+});
+
+test("bg: switching focus mode off in prefs restores at once; on mid-session minimizes", async () => {
+  const s = running();
+  const minimized = [LAYOUT[0], { id: "hn", wide: true, minimized: true, byFocus: true }];
+  const chrome = fakeChrome({ timer: s, layout: minimized, prefs: { focusMode: false } });
+  const bg = createBackground({ chrome, now: () => T0 + 60000, categoryById });
+  await bg.onPrefsChange({ focusMode: false }, { focusMode: true });
+  assert.equal(chrome.data.layout[1].minimized, false);
+  chrome.data.prefs = { focusMode: true };
+  await bg.onPrefsChange({ focusMode: true }, { focusMode: false });
+  assert.equal(chrome.data.layout[1].minimized, true, "session still running: news minimized again");
+  chrome.calls.sets.length = 0;
+  await bg.onPrefsChange({ focusMode: true, user: "ann" }, { focusMode: true });
+  assert.deepEqual(chrome.calls.sets, [], "other prefs changes do nothing");
+});
+
 test("bg: pausing clears the alarm and restores news; no layout write when focus state is unchanged", async () => {
   const chrome = fakeChrome({ layout: [LAYOUT[0], { id: "hn", wide: true, minimized: true, byFocus: true }] });
   const bg = createBackground({ chrome, now: () => T0, categoryById });

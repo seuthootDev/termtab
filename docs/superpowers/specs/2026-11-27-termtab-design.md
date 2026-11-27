@@ -197,6 +197,15 @@ The to-do widget keeps several named lists (`todo work`, `todo home`), switched 
 - Settings import validates field by field (unknown keys or wrong types reject the whole file) and is capped at 1 MB.
 - `demo/data.js` ships in the store zip because the shell imports it statically; it is only used with `?demo=1`.
 - Screenshots are taken over the DevTools protocol; the store package is written by `scripts/zip.mjs`.
+- A tab left open stays current: the grid reloads every online widget when the page becomes visible and every 60 s while it is visible (only stale cache entries hit the network).
+- Optional widget hook `cacheKey(settings, now) → string`, appended to the cache key. On this day uses the local `YYYY-MM-DD`, so it turns over at midnight despite its 24 h TTL; the calendar redraws when the local day changes.
+- `meta.usesPrefs: true` (clock, world clocks, system info, focus timer): only these re-render on a prefs change; every other window just gets its title and prompt line redrawn, so ambient sound and typed input survive. A search-engine change redraws no window.
+- Error backoff: a failed fetch is stored with `failedAt` and counts as fresh for 60 s, so new tabs do not hammer a source that is down or rate limiting; the retry button passes `force` to bypass it.
+- One failing currency, unknown coin or failing Hacker News story no longer fails its widget (`Promise.allSettled`; "n/a" / "unknown coin" rows). Exchange-rate settings accept only the currencies Frankfurter serves (bundled list).
+- Focus mode switched off restores the news windows (at once, and again when the session ends).
+- Clicking the toolbar button opens a new tab (`chrome.action.onClicked`, no extra permission).
+- `?demo=1` shows fixed System info values for the store screenshots.
+- Import also rejects duplicate layout ids and malformed calculator history; import merges into the current settings (the Preferences window says so).
 
 ## Decided by the owner
 

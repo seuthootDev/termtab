@@ -24,8 +24,10 @@ export default {
     const all = await getJson(buildUrl());
     if (!Array.isArray(all)) throw bad("hn");
     const ids = all.slice(0, count(settings));
-    const items = await Promise.all(ids.map((id) => getJson(itemUrl(id))));
-    return { ids, items };
+    // one failing story is skipped; all of them failing fails the fetch
+    const res = await Promise.allSettled(ids.map((id) => getJson(itemUrl(id))));
+    if (res.length && res.every((r) => r.status === "rejected")) throw res[0].reason;
+    return { ids, items: res.map((r) => (r.status === "fulfilled" ? r.value : null)) };
   },
   parse(raw) {
     if (!isObj(raw) || !Array.isArray(raw.items)) throw bad("hn");

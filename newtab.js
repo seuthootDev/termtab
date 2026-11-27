@@ -18,7 +18,7 @@ import { createTop } from "./shell/top.js";
 import { createPanels } from "./shell/panels.js";
 import { enableShortcuts } from "./shell/shortcuts.js";
 import { shouldChime, playChime } from "./shell/chime.js";
-import { DEFAULT_PREFS, FONT_PX, WALLPAPERS } from "./lib/prefs.js";
+import { DEFAULT_PREFS, FONT_PX, WALLPAPERS, prefsEffects } from "./lib/prefs.js";
 import { announceFocusStart } from "./widgets/timer.js";
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -49,8 +49,9 @@ async function main() {
     store.set("layout", layout);
   }
   function setPrefs(next) {
+    const prev = prefs;
     prefs = next;
-    applyPrefs();
+    applyPrefs(prev);
     store.set("prefs", prefs);
   }
   function applyAppearance() {
@@ -59,8 +60,15 @@ async function main() {
     document.body.classList.add(`wp-${wp}`);
     document.body.style.fontSize = `${FONT_PX[prefs.fontSize] ?? FONT_PX.medium}px`;
   }
-  function applyPrefs() {
-    applyAppearance();
+  // Only what changed is redrawn: a search-engine change leaves every window alone, and
+  // rerenderAll keeps widgets without meta.usesPrefs (ambient sound, typed input) as they are.
+  function applyPrefs(prev) {
+    const fx = prefsEffects(prev, prefs);
+    if (fx.appearance) applyAppearance();
+    if (!fx.windows) {
+      top.refresh(); // the engine picker
+      return;
+    }
     grid.rerenderAll(layout);
     top.refresh();
     menubar.refresh();
@@ -128,8 +136,9 @@ async function main() {
   store.onChange("prefs", (v) => {
     const next = { ...DEFAULT_PREFS, ...v };
     if (!same(next, prefs)) {
+      const prev = prefs;
       prefs = next;
-      applyPrefs();
+      applyPrefs(prev);
     }
   });
 

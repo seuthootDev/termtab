@@ -92,3 +92,33 @@ test("importSettings rejects oversized input with too-large", () => {
   err(() => importSettings("x".repeat(MAX_IMPORT_BYTES + 1)), "too-large");
   err(() => importSettings(42), "bad-json");
 });
+
+test("prefsEffects: a search-engine change touches no window; user/clock changes do", async () => {
+  const { prefsEffects } = await import("../lib/prefs.js");
+  const base = { ...DEFAULT_PREFS };
+  assert.deepEqual(prefsEffects(base, { ...base, searchEngine: "naver" }), { appearance: false, windows: false });
+  assert.deepEqual(prefsEffects(base, { ...base }), { appearance: false, windows: false });
+  assert.equal(prefsEffects(base, { ...base, user: "ann" }).windows, true);
+  assert.equal(prefsEffects(base, { ...base, clock24: false }).windows, true);
+  assert.equal(prefsEffects(base, { ...base, ambientWithTimer: true }).windows, true);
+  assert.deepEqual(prefsEffects(base, { ...base, wallpaper: 2 }), { appearance: true, windows: false });
+  assert.deepEqual(prefsEffects(base, { ...base, fontSize: "large", searchEngine: "github" }), { appearance: true, windows: false });
+});
+
+test("newtab: the search-engine path does not go through applyPrefs/rerenderAll", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync(new URL("../newtab.js", import.meta.url), "utf8");
+  assert.match(src, /prefsEffects\(/, "newtab.js decides what a prefs change touches");
+  assert.doesNotMatch(src, /applyPrefs\(\);\s*\n?\s*store\.set\("prefs"/, "setPrefs no longer re-renders unconditionally");
+});
+
+test("importSettings rejects a layout with duplicate ids and junk calculator history", () => {
+  const doc = (data) => JSON.stringify({ app: "termtab", version: 1, data });
+  err(() => importSettings(doc({ layout: [{ id: "clock" }, { id: "hn" }, { id: "clock" }] })), "bad-data");
+  for (const history of [
+    "1+1", [null], [{ expr: "1+1" }], [{ expr: 2, result: "2" }], [{ expr: "1+1", result: {} }], [{ expr: "1+1", result: ["2"] }],
+  ]) err(() => importSettings(doc({ "settings:calculator": { history } })), "bad-data");
+  const ok = importSettings(doc({ "settings:calculator": { history: [{ expr: "1+1", result: "2" }, { expr: "2*3", result: 6 }] } }));
+  assert.equal(ok["settings:calculator"].history.length, 2);
+  assert.ok(importSettings(doc({ "settings:calculator": {} })));
+});
