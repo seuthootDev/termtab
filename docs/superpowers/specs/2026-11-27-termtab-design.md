@@ -1,13 +1,13 @@
 # termtab — design
 
 Date: 2026-11-27
-Status: draft for the owner's approval. Working name `termtab`; the final name is open.
+Status: builder check done; awaiting the owner's approval. Working name `termtab`; the final name is open.
 
 ## Intent
 
 A free Chrome extension that replaces the new tab page with a dashboard of widgets (clock, focus timer, to-do, weather, news, and more), drawn as a macOS desktop: a menu bar on top and each widget in its own macOS Terminal window with traffic-light buttons, a centered title like `you — weather — zsh — 80×24`, and a zsh prompt line (`you@MacBook ~ % weather seoul`). The user picks which widgets to show, drags windows to reorder them, and the layout is remembered.
 
-Why: the owner's earlier projects (GitHub README tools) only reach GitHub users and were hard to grow. This tests the Chrome Web Store as a channel with something anyone can use. The terminal look is the hook ("makes your browser look like a developer's"), the widgets are the reason to keep it. A mockup was approved on 2026-11-27 (artifact "Terminal New Tab").
+Why: the owner's earlier projects (GitHub README tools) only reach GitHub users and were hard to grow. This tests the Chrome Web Store as a channel with something anyone can use. The terminal look is the hook ("makes your browser look like a developer's"), the widgets are the reason to keep it. A mockup was approved on 2026-11-27; a copy is in `docs/mockup/terminal-newtab.html`. **The mockup is the reference for how each widget looks** (layouts of the timer, weather, neofetch and so on); this document wins on behavior, data and anything the mockup fakes.
 
 ## Goals
 
@@ -52,7 +52,7 @@ Why: the owner's earlier projects (GitHub README tools) only reach GitHub users 
 
 | | Approach | Trade-off | Decision |
 |---|---|---|---|
-| A | Plain MV3, ES modules, no build; each widget a module with a fixed interface; pure logic tested with `node --test` | Same as the owner's previous extension; small, fast new tab; drag and drop written by hand | **Chosen** (builder's call) |
+| A | Plain MV3, ES modules, no build; each widget a module with a fixed interface; pure logic tested with `node --test` | Same approach as the owner's previous extension (terminal-skin, since deleted, so no code to copy; its lessons are written into Testing and Release below); small, fast new tab; drag and drop written by hand | **Chosen** (builder's call) |
 | B | WXT + a UI framework | Comfortable for many widgets; bigger bundle on every new tab, more tooling | Not now |
 | C | Bundle a drag-and-drop/grid library | Faster drag-and-drop; extra weight for one feature | Rejected; drag is ~150 lines |
 
@@ -106,10 +106,11 @@ Each `widgets/<id>.js` exports:
 | news | GitHub trending (most-starred repos created in the last 7 days) | GitHub search | 6 h |
 | news | On this day | Wikimedia | 24 h |
 | fun | System info, neofetch style (browser, OS, screen, cores, online, open tab count via `chrome.tabs.query` count only) | browser | — |
-| fun | GitHub contributions (image from the owner's terminal card service for a username) | image URL | browser cache |
 | fun | Fortune (bundled quotes, cowsay frame) | bundled | per tab |
 
-The search bar is always first and cannot be removed. Default set for a new install: clock, focus timer, weather, to-do, Hacker News, calendar, notes.
+The search bar is always first and cannot be removed.
+
+**Deferred to v1.1 (builder's call, flagged):** a GitHub contributions widget. The owner's card service draws its own macOS window frame, so embedding it would put a terminal window inside a terminal window; it needs a frameless option added to the card service first (work in the other repo). Default set for a new install: clock, focus timer, weather, to-do, Hacker News, calendar, notes.
 
 ### Data and caching
 
@@ -151,12 +152,12 @@ The search bar is always first and cannot be removed. Default set for a new inst
 ### Testing
 
 - `node --test`: layout operations, cache TTL decisions, timer state machine, date helpers, every widget's `parse` against fixture JSON, locale key coverage, manifest test (permissions exactly `storage`, `alarms`; `newtab` override; every file exists).
-- `?demo=1` loads bundled sample data for every widget; a headless screenshot script renders the page from it for review and store images.
+- `?demo=1` loads bundled sample data for every widget; a headless screenshot script renders the page from it for review and store images. Lessons from the previous extension: use Edge or Chrome for Testing (branded Chrome ignores `--load-extension`), a fresh browser profile per run (Edge disables command-line extensions in a reused profile), and a timeout per page.
 - GitHub Actions runs the Node tests.
 
 ### Release
 
-- `npm run package` writes the store zip (manifest at root, forward slashes).
+- `npm run package` writes the store zip with a small built-in zip writer (manifest at the root, forward-slash paths). Windows PowerShell's `Compress-Archive` nests files and uses backslashes, which the store rejects.
 - The owner registers the store account ($5 once) and submits; public GitHub repo with README, privacy policy and screenshots.
 
 ## Decided by the owner
