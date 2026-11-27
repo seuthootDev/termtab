@@ -63,16 +63,19 @@ Why: the owner's earlier projects (GitHub README tools) only reach GitHub users 
 
 ```
 manifest.json
-newtab.html, newtab.css, newtab.js     page shell: menu bar, search window, grid, widget drawer, drag
-background.js                          alarms for the focus timer, badge
+newtab.html, newtab.css, newtab.js     page entry: wires the shell modules together
+shell/*.js                             menu bar, search window, grid, widget drawer, drag, overlays, shortcuts
+background.js                          alarms for the focus timer, badge, focus mode (logic in lib/bg.js)
 lib/store.js                           typed wrapper over chrome.storage.local (layout, widget settings, cache)
 lib/cache.js                           stale-while-revalidate: get(key, ttl, fetcher)
 lib/layout.js                          pure: add, remove, move(from, to), toggle wide/minimized
 lib/timer.js                           pure focus-timer state machine
 lib/dates.js                           pure: ISO week, month grid, habit week, countdown days
-widgets/<id>.js                        one module per widget
+widgets/<id>.js                        one module per widget (widgets/index.js lists them)
+data/fortunes.js                       bundled quotes
+demo/data.js                           sample data for ?demo=1 (shipped: shell/windows.js imports it)
 _locales/en, _locales/ko
-icons/, test/, scripts/ (screenshot, package)
+icons/, test/, scripts/ (screenshot, zip + package, icons), store/ (store images)
 ```
 
 ### Widget interface
@@ -105,7 +108,7 @@ Each `widgets/<id>.js` exports:
 | news | Hacker News top (count 5–10) | HN API | 15 min |
 | news | DEV top posts this week | DEV API | 1 h |
 | news | GitHub trending (most-starred repos created in the last 7 days) | GitHub search | 6 h |
-| news | On this day | Wikimedia | 24 h |
+| news | On this day (falls back to the English edition when Wikimedia has no feed for the UI language, e.g. ko) | Wikimedia | 24 h |
 | fun | System info, neofetch style (browser, OS, screen, cores, online, open tab count via `chrome.tabs.query` count only) | browser | — |
 | fun | Fortune (bundled quotes, cowsay frame) | bundled | per tab |
 
@@ -123,13 +126,13 @@ The search bar is always first and cannot be removed.
 ### Data and caching
 
 - `cache.get(key, ttl, fetcher)` returns the saved value at once (even if stale) and, when older than `ttl`, fetches in the background and re-renders that one widget. Fetches only happen while a new tab is open; there is no background polling.
-- Concurrent new tabs share one in-flight fetch per key (a lock in `chrome.storage.session`).
+- Concurrent new tabs share one in-flight fetch per key (a Web Locks API lock, `navigator.locks`, atomic across every page of the extension origin).
 - On failure the widget keeps the old data and shows `fetch failed · retry` in its status line; nothing else on the page is affected.
 - Weather location: a city search box using Open-Meteo geocoding, no location permission.
 
 ### Layout, windows and drag
 
-- Stored as `layout: [{ id, wide, minimized }]` in order. The grid flows left to right (CSS grid, `auto-fill`, min 320 px), wide windows span two columns.
+- Stored as `layout: [{ id, wide, minimized }]` in order; each widget's settings are stored under `settings:<id>`. The grid flows left to right (CSS grid, `auto-fill`, min 320 px), wide windows span two columns.
 - Traffic lights: red removes the widget (its settings are kept, so adding it back restores them), yellow toggles minimized (title bar only), green toggles wide.
 - Drag: press on a title bar (not on a button) and move; a placeholder shows where the window will land; drop saves the new order. Pointer events, so mouse, pen and touch work. Keyboard: focus a title bar and press `Alt+←/→` to move it one place.
 - Widget drawer (menu bar "＋ Widgets"): every widget grouped by category with a checkbox, description, data source and its command; checking adds it at the end.
@@ -152,12 +155,12 @@ The to-do widget keeps several named lists (`todo work`, `todo home`), switched 
 
 ### Menu bar
 
-`Terminal` (Widgets…, Preferences…, About), and on the right the date and time. Preferences: your name and machine name for the prompt, 24-hour clock, temperature unit, wallpaper (three dark gradients), font size (small/medium/large), focus mode on/off, workday hours, export/import settings, "reset layout".
+`Terminal` (Widgets…, Preferences…, About), and on the right the date and time. Preferences: your name and machine name for the prompt, 24-hour clock, temperature unit, wallpaper (three dark gradients), font size (small/medium/large), focus mode on/off, workday hours, export/import settings, "reset layout". The temperature unit and workday hours write the Weather and Workday widgets' own settings (`settings:weather`, `settings:workday`), so there is one source of truth. Import validates the file field by field, rejects files over 1 MB, and changes nothing unless the whole file is valid.
 
 ### Focus timer across tabs
 
 - State `{ mode: focus|break, endsAt | remaining, running, doneToday, day }` lives in storage, so every new tab shows the same countdown.
-- `background.js` sets a `chrome.alarms` alarm for `endsAt`. When it fires: switch mode, increase the count, and set the toolbar badge (`✓`, cleared on the next new tab). If a new tab is open it also plays a short chime (only after the user has interacted with the page, per autoplay rules).
+- `background.js` sets a `chrome.alarms` alarm for `endsAt`. When it fires: switch mode, increase the count, and set the toolbar badge (`✓`, cleared on the next new tab; the manifest has an `action` key so the badge has a toolbar button). If a new tab is open it also plays a short chime (only after the user has interacted with the page, per autoplay rules).
 - No system notifications in v1, to keep the install free of warnings.
 
 ### Visual design
@@ -175,14 +178,25 @@ The to-do widget keeps several named lists (`todo work`, `todo home`), switched 
 
 ### Testing
 
-- `node --test`: layout operations, cache TTL decisions, timer state machine, date helpers, every widget's `parse` against fixture JSON, locale key coverage, manifest test (permissions exactly `storage`, `alarms`; `newtab` override; every file exists).
-- `?demo=1` loads bundled sample data for every widget; a headless screenshot script renders the page from it for review and store images. Lessons from the previous extension: use Edge or Chrome for Testing (branded Chrome ignores `--load-extension`), a fresh browser profile per run (Edge disables command-line extensions in a reused profile), and a timeout per page.
+- `node --test`: layout operations, cache TTL decisions, timer state machine, date helpers, every widget's `parse` against fixture JSON, locale key coverage, manifest test (permissions exactly `storage`, `alarms`, `system.cpu`, `system.memory`; `newtab` override; every file exists), zip writer (crc32, deflate round trip) and a package test (every file reachable from newtab.html, newtab.js and background.js is in the zip).
+- `?demo=1` loads bundled sample data for every widget; a screenshot script renders the page from it for review and store images. It drives headless Edge over the DevTools protocol (seed `chrome.storage.local`, reload, wait, `Page.captureScreenshot`), because headless `--screenshot` does not wait for storage or async rendering. Lessons from the previous extension: use Edge or Chrome for Testing (branded Chrome ignores `--load-extension`), a fresh browser profile per run (Edge disables command-line extensions in a reused profile), and a timeout per page.
 - GitHub Actions runs the Node tests.
 
 ### Release
 
 - `npm run package` writes the store zip with a small built-in zip writer (manifest at the root, forward-slash paths). Windows PowerShell's `Compress-Archive` nests files and uses backslashes, which the store rejects.
 - The owner registers the store account ($5 once) and submits; public GitHub repo with README, privacy policy and screenshots.
+
+## Changes during implementation (2026-11-27)
+
+- Cross-tab fetch lock: the Web Locks API (`navigator.locks`) instead of a flag in `chrome.storage.session`; it is atomic and released if a tab closes mid-fetch.
+- Widget settings are stored under `settings:<id>` keys (kept when a window is closed, so adding it back restores them).
+- The manifest has an `action` key (title only) so the focus-timer badge has a toolbar button.
+- On this day falls back to English when Wikimedia has no feed for the UI language (ko has none).
+- Preferences' temperature unit and workday hours write the Weather and Workday widgets' own settings instead of separate prefs.
+- Settings import validates field by field (unknown keys or wrong types reject the whole file) and is capped at 1 MB.
+- `demo/data.js` ships in the store zip because the shell imports it statically; it is only used with `?demo=1`.
+- Screenshots are taken over the DevTools protocol; the store package is written by `scripts/zip.mjs`.
 
 ## Decided by the owner
 

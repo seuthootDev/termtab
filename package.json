@@ -4,7 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "screenshots": "node scripts/screenshot.mjs",
+    "package": "node scripts/package.mjs",
+    "icons": "node scripts/icons.mjs"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  }
 }

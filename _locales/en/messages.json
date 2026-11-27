@@ -495,7 +495,7 @@
     "message": "GitHub trending"
   },
   "w_trending_desc": {
-    "message": "Repos that gained the most stars this week"
+    "message": "The most-starred repos created this week"
   },
   "w_wiki_name": {
     "message": "On this day"

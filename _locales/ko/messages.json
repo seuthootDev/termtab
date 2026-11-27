@@ -3,7 +3,7 @@
     "message": "termtab"
   },
   "appDescription": {
-    "message": "새 탭을 macOS 터미널처럼. 위젯, 집중 타이머, 날씨와 뉴스까지 모두 무료."
+    "message": "새 탭을 macOS 터미널처럼. 위젯, 집중 타이머, 날씨, 뉴스까지 전부 무료예요."
   },
   "menuBar": {
     "message": "메뉴 막대"
@@ -63,7 +63,7 @@
     "message": "검색"
   },
   "searchPlaceholder": {
-    "message": "입력하고 Enter를 누르세요"
+    "message": "검색어를 입력하고 Enter를 누르세요"
   },
   "searchAria": {
     "message": "웹 검색"
@@ -123,7 +123,7 @@
     "message": "설정"
   },
   "winTitleBar": {
-    "message": "$1 윈도우. 드래그하거나 Alt+←/→로 이동"
+    "message": "$1 윈도우. 드래그하거나 Alt+←/→ 키로 옮길 수 있어요"
   },
   "fetchFailed": {
     "message": "가져오기 실패"
@@ -132,10 +132,10 @@
     "message": "다시 시도"
   },
   "widgetError": {
-    "message": "이 위젯에서 오류가 났어요"
+    "message": "이 위젯에 오류가 발생했어요"
   },
   "emptyGrid": {
-    "message": "열린 윈도우가 없어요. ＋ 위젯을 눌러 추가하세요."
+    "message": "열린 윈도우가 없어요. ＋ 위젯을 눌러 추가해 보세요."
   },
   "cat_basics": {
     "message": "기본"
@@ -156,10 +156,10 @@
     "message": "내 컴퓨터"
   },
   "src_extension": {
-    "message": "확장 프로그램에 저장"
+    "message": "확장 프로그램에 저장됨"
   },
   "src_openMeteo": {
-    "message": "Open-Meteo (무료, 키 불필요)"
+    "message": "Open-Meteo (무료, API 키 필요 없음)"
   },
   "src_hn": {
     "message": "Hacker News API"
@@ -186,7 +186,7 @@
     "message": "할 일"
   },
   "w_todo_desc": {
-    "message": "간단한 할 일, 클릭해서 완료"
+    "message": "간단한 할 일 목록, 클릭하면 완료 표시"
   },
   "w_hn_name": {
     "message": "Hacker News"
@@ -198,7 +198,7 @@
     "message": "달력"
   },
   "w_calendar_desc": {
-    "message": "이번 달, 오늘 강조"
+    "message": "이번 달 달력, 오늘 날짜 강조"
   },
   "w_notes_name": {
     "message": "메모"
@@ -225,10 +225,10 @@
     "message": "이 도움말 보기"
   },
   "helpEsc": {
-    "message": "윈도우, 메뉴, 위젯 서랍 닫기"
+    "message": "윈도우, 메뉴, 위젯 목록 닫기"
   },
   "helpMove": {
-    "message": "포커스된 윈도우 이동 (제목 막대에서)"
+    "message": "선택한 윈도우 옮기기 (제목 막대에서)"
   },
   "aboutFree": {
     "message": "무료예요. 계정도 추적도 없고, 데이터는 브라우저 안에만 저장돼요."
@@ -264,7 +264,7 @@
     "message": "오늘의 한마디"
   },
   "w_fortune_desc": {
-    "message": "소가 들려주는 개발자 명언"
+    "message": "소가 읊어 주는 개발자 명언"
   },
   "w_calculator_name": {
     "message": "계산기"
@@ -306,10 +306,10 @@
     "message": "날짜"
   },
   "fortuneAnother": {
-    "message": "다른 말"
+    "message": "하나 더"
   },
   "calcPlaceholder": {
-    "message": "수식을 입력하고 엔터를 누르세요"
+    "message": "수식을 입력하고 Enter를 누르세요"
   },
   "calcErrSyntax": {
     "message": "오류: 문법"
@@ -327,7 +327,7 @@
     "message": "$1에 시작"
   },
   "wdAfter": {
-    "message": "오늘 근무 끝"
+    "message": "오늘 근무 끝!"
   },
   "wdOff": {
     "message": "쉬는 날"
@@ -375,7 +375,7 @@
     "message": "배경 소리"
   },
   "w_ambient_desc": {
-    "message": "빗소리, 카페, 화이트·브라운 노이즈를 브라우저에서 만들어요"
+    "message": "브라우저가 직접 만드는 빗소리, 카페, 화이트·브라운 노이즈"
   },
   "timerFocus": {
     "message": "집중"
@@ -399,7 +399,7 @@
     "message": "할 일 목록"
   },
   "todoPlaceholder": {
-    "message": "+ 할 일을 입력하고 엔터를 누르세요"
+    "message": "+ 할 일을 입력하고 Enter를 누르세요"
   },
   "todoDoneCount": {
     "message": "$1/$2 완료"
@@ -420,7 +420,7 @@
     "message": "목록마다 이름이 있어야 하고, 이름이 서로 달라야 해요"
   },
   "notesPlaceholder": {
-    "message": "여기에 입력하면 바로바로 저장돼요"
+    "message": "여기에 입력하면 바로 저장돼요"
   },
   "notesSaved": {
     "message": "-- 저장됨 --"
@@ -444,10 +444,10 @@
     "message": "카페"
   },
   "ambWhite": {
-    "message": "화이트"
+    "message": "화이트 노이즈"
   },
   "ambBrown": {
-    "message": "브라운"
+    "message": "브라운 노이즈"
   },
   "ambPlay": {
     "message": "재생"
@@ -495,7 +495,7 @@
     "message": "GitHub 트렌딩"
   },
   "w_trending_desc": {
-    "message": "이번 주 별을 가장 많이 받은 저장소"
+    "message": "이번 주에 만들어진 저장소 중 별을 가장 많이 받은 곳"
   },
   "w_wiki_name": {
     "message": "오늘의 역사"
@@ -624,10 +624,10 @@
     "message": "크게"
   },
   "prefsFocusMode": {
-    "message": "집중 세션 중에는 뉴스 창을 최소화"
+    "message": "집중 세션 중에는 뉴스 윈도우 최소화"
   },
   "prefsAmbient": {
-    "message": "타이머와 함께 백색 소음 재생"
+    "message": "타이머와 함께 배경 소리 재생"
   },
   "prefsWorkStart": {
     "message": "근무 시작 시각"
@@ -636,7 +636,7 @@
     "message": "근무 종료 시각"
   },
   "prefsNameInvalid": {
-    "message": "이름과 머신 이름은 공백만이 아닌 1~24자로 입력해 주세요."
+    "message": "이름과 컴퓨터 이름은 1~24자로 입력해 주세요. 공백만으로는 안 돼요."
   },
   "prefsWorkInvalid": {
     "message": "근무 종료 시각은 시작 시각보다 늦어야 해요."
