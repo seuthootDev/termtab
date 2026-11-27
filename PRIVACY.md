@@ -24,7 +24,7 @@ Each request goes directly from your browser to the service below. Like any web 
 | GitHub trending | GitHub search API (`api.github.com`) | Nothing about you: the date one week ago |
 | On this day | Wikimedia feed API (`api.wikimedia.org`) | Nothing about you: today's month and day, and the edition language (falls back to English when your language has no feed) |
 | Links (favicons) | Google's favicon service (`www.google.com/s2/favicons`) | **The hostname of each link in your list** (for example `github.com`), to show the site's icon. Google receives these hostnames when the icons load. |
-| Search window | The search engine you pick (Google, DuckDuckGo, Naver or GitHub) | What you type, only when you press Enter. This is a normal visit to that site. |
+| Search window | Your default search engine as set in Chrome (through Chrome's search API), or GitHub if you pick it | What you type, only when you press Enter. This is a normal search on that site; termtab never changes your default search engine. |
 
 Every other widget (clock, focus timer, to-do, notes, habits, countdown, ambient sound, workday, calendar, world clocks, calculator, fortune, system info, system monitor) works entirely on your device and makes no network requests.
 
@@ -32,6 +32,7 @@ Every other widget (clock, focus timer, to-do, notes, habits, countdown, ambient
 
 - `storage`: saves your settings and cached data on your device.
 - `alarms`: ends a focus session on time.
+- `search`: hands your search text to the default search engine you chose in Chrome.
 - `system.cpu`, `system.memory`: CPU and memory usage for the System monitor widget, read on your device and never sent anywhere.
 
 termtab requests no host permissions and runs no remote code.

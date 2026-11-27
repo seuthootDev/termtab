@@ -4,7 +4,7 @@ Minor findings from the per-task and final reviews that were left for later. Non
 
 ## Before submitting
 
-- Check the Chrome Web Store policy on search boxes in new-tab extensions (whether chrome.search / the default engine is required).
+- ~~Check the Chrome Web Store policy on search boxes~~ — done: search now uses the default engine via chrome.search, plus GitHub.
 - Decide how "macOS", "MacBook" and "Terminal" appear in the store name and description (trademark wording).
 - Prepare the permission justification for system.cpu / system.memory (System monitor widget).
 

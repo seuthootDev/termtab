@@ -17,7 +17,7 @@ Chrome Web Store: coming soon.
 | basics | Clock: big digits, date, ISO week | your computer |
 | basics | Links: your own list of sites, with favicons | stored in the extension; icons from Google's favicon service |
 | basics | Calculator: `bc`-style, keeps your last 5 results | your computer |
-| basics | Search window (Google, DuckDuckGo, Naver, GitHub): always on above the grid, not a widget | the engine you pick, when you press Enter |
+| basics | Search window (your browser's default search engine, or GitHub): always on above the grid, not a widget | your default search engine via Chrome, or github.com, when you press Enter |
 | focus | Focus timer: 25/5 pomodoro, today's count, shared across tabs | your computer |
 | focus | To-do: several named lists (`todo work`, `todo home`) | stored in the extension |
 | focus | Notes: a scratchpad that saves as you type | stored in the extension |
@@ -52,6 +52,7 @@ There is no paid tier and nothing is locked. Features other new-tab extensions c
 |---|---|
 | `storage` | Keeps your layout, settings and cached widget data on your device |
 | `alarms` | Ends a focus session on time even when no new tab is open |
+| `search` | Sends what you type in the search window to your own default search engine (the one set in Chrome) |
 | `system.cpu`, `system.memory` | The System monitor widget's CPU and memory bars |
 
 None of these shows a warning when you install. There are no host permissions: every data source allows requests from an extension page on its own.
@@ -105,4 +106,4 @@ termtab은 Chrome 새 탭을 macOS 데스크톱으로 바꿔 주는 확장 프�
 
 - 유료 플랜이 없어요. 뽀모도로, 여러 개의 할 일 목록, 배경 소리, 집중 모드, 세계 시계, 카운트다운까지 모두 무료예요.
 - 계정, 분석, 추적이 없어요. 데이터는 내 기기의 `chrome.storage.local`에만 저장돼요. 자세한 내용은 [PRIVACY.md](PRIVACY.md)를 보세요.
-- 설치할 때 권한 경고가 뜨지 않아요 (`storage`, `alarms`, `system.cpu`, `system.memory`).
+- 설치할 때 권한 경고가 뜨지 않아요 (`storage`, `alarms`, `search`, `system.cpu`, `system.memory`).

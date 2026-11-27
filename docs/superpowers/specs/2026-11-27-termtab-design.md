@@ -37,7 +37,7 @@ Why: the owner's earlier projects (GitHub README tools) only reach GitHub users 
 ## Constraints
 
 - Manifest V3, `chrome_url_overrides.newtab`.
-- Permissions: `storage`, `alarms`, `system.cpu`, `system.memory`. None shows an install warning; the implementation must confirm this for `system.*` by loading the packed extension, and drop the System monitor widget (and those two permissions) if Chrome shows any warning. (`notifications` is not requested; see the focus timer.)
+- Permissions: `storage`, `alarms`, `search`, `system.cpu`, `system.memory`. None shows an install warning; the implementation must confirm this for `system.*` by loading the packed extension, and drop the System monitor widget (and those two permissions) if Chrome shows any warning. (`notifications` is not requested; see the focus timer.)
 - No host permissions: every data source must allow cross-origin requests from an extension page. Checked on 2026-11-27 (all return `Access-Control-Allow-Origin`):
   - Open-Meteo forecast and geocoding (`api.open-meteo.com`, `geocoding-api.open-meteo.com`), no key
   - Hacker News (`hacker-news.firebaseio.com`)
@@ -94,7 +94,7 @@ Each `widgets/<id>.js` exports:
 |---|---|---|---|
 | basics | Clock (big digits, date, ISO week) | computer | 1 s while open |
 | basics | Quick links (user's own list) | storage | — |
-| basics | Search bar window (Google, DuckDuckGo, Naver, GitHub) | — | — |
+| basics | Search bar window (the user's default engine via `chrome.search`, or GitHub) | — | — |
 | focus | Focus timer (25/5 pomodoro, today's count) | storage + `alarms` | — |
 | focus | To-do | storage | — |
 | focus | Notes (saves as you type) | storage | — |
@@ -188,6 +188,8 @@ The to-do widget keeps several named lists (`todo work`, `todo home`), switched 
 - The owner registers the store account ($5 once) and submits; public GitHub repo with README, privacy policy and screenshots.
 
 ## Changes during implementation (2026-11-27)
+
+- Search window: Chrome Web Store policy requires a new tab page's web search to respect the user's search settings through the Chrome Search API. The dropdown is now "default" (`chrome.search.query`, `search` permission, no install warning) plus GitHub as platform search; the hard-coded Google/DuckDuckGo/Naver options were removed. Older stored values still import and show as "default".
 
 - Cross-tab fetch lock: the Web Locks API (`navigator.locks`) instead of a flag in `chrome.storage.session`; it is atomic and released if a tab closes mid-fetch.
 - Widget settings are stored under `settings:<id>` keys (kept when a window is closed, so adding it back restores them).
