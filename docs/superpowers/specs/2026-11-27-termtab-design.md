@@ -1,7 +1,7 @@
 # termtab — design
 
 Date: 2026-11-27
-Status: builder check done; awaiting the owner's approval. Working name `termtab`; the final name is open.
+Status: approved by the owner on 2026-11-27. Working name `termtab`; the final name is open.
 
 ## Intent
 
@@ -16,6 +16,7 @@ Why: the owner's earlier projects (GitHub README tools) only reach GitHub users 
 - Feel like macOS Terminal: menu bar, traffic lights that work (red closes the widget, yellow minimizes it to its title bar, green toggles wide), rounded windows with shadows, SF Mono/Menlo, zsh prompt lines.
 - Install with no permission warnings.
 - English and Korean, following the browser language.
+- **Everything free.** No paid tier, no locked features. Features competitors charge for (Momentum's pomodoro, countdowns, multiple to-do lists, ambient sounds) are free here and said so in the store listing.
 
 ## Non-goals (v1)
 
@@ -36,7 +37,7 @@ Why: the owner's earlier projects (GitHub README tools) only reach GitHub users 
 ## Constraints
 
 - Manifest V3, `chrome_url_overrides.newtab`.
-- Permissions: `storage`, `alarms`. Nothing that shows a warning. (`notifications` is not requested; see the focus timer.)
+- Permissions: `storage`, `alarms`, `system.cpu`, `system.memory`. None shows an install warning; the implementation must confirm this for `system.*` by loading the packed extension, and drop the System monitor widget (and those two permissions) if Chrome shows any warning. (`notifications` is not requested; see the focus timer.)
 - No host permissions: every data source must allow cross-origin requests from an extension page. Checked on 2026-11-27 (all return `Access-Control-Allow-Origin`):
   - Open-Meteo forecast and geocoding (`api.open-meteo.com`, `geocoding-api.open-meteo.com`), no key
   - Hacker News (`hacker-news.firebaseio.com`)
@@ -108,6 +109,13 @@ Each `widgets/<id>.js` exports:
 | fun | System info, neofetch style (browser, OS, screen, cores, online, open tab count via `chrome.tabs.query` count only) | browser | — |
 | fun | Fortune (bundled quotes, cowsay frame) | bundled | per tab |
 
+| focus | Ambient sound (rain, café, white/brown noise), synthesized with Web Audio, no audio files; optional auto-play with the focus timer | Web Audio | — |
+| focus | Workday (progress bar to the end of the user's workday, time left, weekend aware) | computer | 1 min |
+| basics | Calculator (`bc`-style: type an expression, Enter, history of the last 5) | computer | — |
+| fun | System monitor (`htop`-style CPU and memory bars, refreshed while the tab is open) | `chrome.system.cpu`, `chrome.system.memory` | 2 s |
+
+Above the grid, a **greeting and today's focus** line: `you@MacBook ~ % echo "Good morning, you"` and `focus: <one line the user types>` (cleared each day).
+
 The search bar is always first and cannot be removed.
 
 **Deferred to v1.1 (builder's call, flagged):** a GitHub contributions widget. The owner's card service draws its own macOS window frame, so embedding it would put a terminal window inside a terminal window; it needs a frameless option added to the card service first (work in the other repo). Default set for a new install: clock, focus timer, weather, to-do, Hacker News, calendar, notes.
@@ -126,9 +134,25 @@ The search bar is always first and cannot be removed.
 - Drag: press on a title bar (not on a button) and move; a placeholder shows where the window will land; drop saves the new order. Pointer events, so mouse, pen and touch work. Keyboard: focus a title bar and press `Alt+←/→` to move it one place.
 - Widget drawer (menu bar "＋ Widgets"): every widget grouped by category with a checkbox, description, data source and its command; checking adds it at the end.
 
+### Ideas taken from competitors (all free)
+
+| Idea | From | Here |
+|---|---|---|
+| Greeting and "today's main focus" | Momentum | greeting/focus line above the grid |
+| Pomodoro, countdowns, several to-do lists | Momentum (paid there) | focus timer, countdown widget, to-do with lists |
+| Ambient sounds | Momentum (paid there) | Ambient sound widget |
+| Hide distracting widgets while focusing | Momentum "Balance" | **Focus mode**: while the timer runs in focus mode, widgets in the `news` category are minimized; restored when the break starts |
+| Time left in the workday | Tabliss "Workday" | Workday widget |
+| Calculator, CPU/RAM | Anori | Calculator, System monitor |
+| Favicons on quick links | Bonjourr, Momentum | site icon before each link (from `https://www.google.com/s2/favicons?domain=…&sz=32` as an image; images need no permission) |
+| Settings export/import | Bonjourr | Preferences → Export / Import JSON |
+| Keyboard shortcuts | Bonjourr | `/` focuses search, `n` opens notes, `t` starts/pauses the timer, `?` opens a `man termtab` help window, `Esc` closes overlays |
+
+The to-do widget keeps several named lists (`todo work`, `todo home`), switched with tabs in the window.
+
 ### Menu bar
 
-`Terminal` (Widgets…, Preferences…, About), and on the right the date and time. Preferences: 24-hour clock, temperature unit, wallpaper (three dark gradients), font size (small/medium/large), "reset layout".
+`Terminal` (Widgets…, Preferences…, About), and on the right the date and time. Preferences: your name and machine name for the prompt, 24-hour clock, temperature unit, wallpaper (three dark gradients), font size (small/medium/large), focus mode on/off, workday hours, export/import settings, "reset layout".
 
 ### Focus timer across tabs
 
@@ -166,6 +190,7 @@ The search bar is always first and cannot be removed.
 - New tab page dashboard with as many widgets as possible, chosen by the user.
 - macOS Terminal look, used with clicks, not commands.
 - Drag to reorder.
+- Take the good ideas from similar extensions and give everything away free.
 - No install warnings (the earlier "tabtime" idea was dropped for that reason).
 
 ## Left to the builder
