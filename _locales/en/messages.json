@@ -364,5 +364,98 @@
   },
   "siUptimeVal": {
     "message": "$1m $2s"
+  },
+  "w_habits_name": {
+    "message": "Habits"
+  },
+  "w_habits_desc": {
+    "message": "Tick habits for each day of this week"
+  },
+  "w_ambient_name": {
+    "message": "Ambient sound"
+  },
+  "w_ambient_desc": {
+    "message": "Rain, café, white or brown noise, made in your browser"
+  },
+  "timerFocus": {
+    "message": "focus"
+  },
+  "timerBreak": {
+    "message": "break"
+  },
+  "timerStart": {
+    "message": "start"
+  },
+  "timerPause": {
+    "message": "pause"
+  },
+  "timerReset": {
+    "message": "reset"
+  },
+  "timerToday": {
+    "message": "today $1 sessions · $2 min"
+  },
+  "todoLists": {
+    "message": "To-do lists"
+  },
+  "todoPlaceholder": {
+    "message": "+ add a task and press Enter"
+  },
+  "todoDoneCount": {
+    "message": "$1/$2 done"
+  },
+  "todoClearDone": {
+    "message": "clear done"
+  },
+  "todoListName": {
+    "message": "List name"
+  },
+  "todoAddList": {
+    "message": "add list"
+  },
+  "todoDeleteList": {
+    "message": "delete"
+  },
+  "todoListsBad": {
+    "message": "Each list needs a name, and names must differ"
+  },
+  "notesPlaceholder": {
+    "message": "type here, it saves as you go"
+  },
+  "notesSaved": {
+    "message": "-- saved --"
+  },
+  "notesEditing": {
+    "message": "-- INSERT --"
+  },
+  "habitsLabel": {
+    "message": "Habits, one per line (up to 8)"
+  },
+  "habitsEmpty": {
+    "message": "No habits yet. Add some in settings (⋯)."
+  },
+  "habitsCell": {
+    "message": "$1 on $2"
+  },
+  "ambRain": {
+    "message": "rain"
+  },
+  "ambCafe": {
+    "message": "café"
+  },
+  "ambWhite": {
+    "message": "white"
+  },
+  "ambBrown": {
+    "message": "brown"
+  },
+  "ambPlay": {
+    "message": "play"
+  },
+  "ambStop": {
+    "message": "stop"
+  },
+  "ambVolume": {
+    "message": "volume"
   }
 }

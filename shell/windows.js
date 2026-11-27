@@ -4,6 +4,7 @@ import { h, prompt, title } from "./dom.js";
 import { byId } from "../widgets/index.js";
 import { hash } from "../lib/hash.js";
 import { DEMO } from "../demo/data.js";
+import { createSaveTracker } from "./save-tracker.js";
 
 const DEFAULT_TTL = 15 * 60 * 1000;
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -11,6 +12,7 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
   const mounted = new Map(); // id → window state
   const name = (id) => t(`w_${id}_name`);
+  const ownSaves = createSaveTracker();
 
   function mount(item) {
     const mod = byId(item.id);
@@ -37,6 +39,7 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
     });
     m.unsub.push(store.onChange("settings:" + id, (v) => {
       const next = { ...mod.defaults, ...v };
+      if (ownSaves.isOwn(id, next)) return; // the echo of this tab's ctx.save
       if (!same(next, m.settings)) applySettings(m, next);
     }));
     mounted.set(id, m);
@@ -121,7 +124,9 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
       t,
       prefs,
       refresh: () => load(m, true),
-      save: (settings) => saveSettings(m.id, settings),
+      // The widget already shows what it saves, so its own save does not re-render it
+      // (that would drop the caret); pass { rerender: true } to redraw anyway.
+      save: (settings, opts) => saveSettings(m.id, settings, { rerender: !!opts?.rerender }),
     };
     try {
       const cleanup = mod.render(m.content, ctx);
@@ -155,10 +160,15 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
       h("div", { class: "pb" }, h("div", { class: "cmd" }, prompt(prefs, "widgets --list")), t("emptyGrid"), " ", h("span", { class: "cursor" })));
   }
 
-  async function saveSettings(id, settings) {
+  async function saveSettings(id, settings, { rerender = true } = {}) {
     const m = mounted.get(id);
     const next = { ...(m?.mod.defaults ?? byId(id)?.defaults), ...settings };
-    if (m) applySettings(m, next);
+    if (m && rerender) applySettings(m, next);
+    else if (m) {
+      m.settings = next;
+      m.cmd.replaceChildren(prompt(getPrefs(), m.mod.meta.command(next))); // e.g. `todo home`
+    }
+    ownSaves.mark(id, next);
     await store.set("settings:" + id, next);
   }
 

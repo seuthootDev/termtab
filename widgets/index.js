@@ -5,7 +5,9 @@
 //   meta { id, category: "basics"|"focus"|"info"|"news"|"fun", size: "small"|"wide",
 //          source: <_locales key>, command(settings) → string }
 //   defaults                      the widget's settings
-//   render(el, ctx) → cleanup?    ctx = { settings, data, error, t, refresh(), save(settings), prefs }
+//   render(el, ctx) → cleanup?    ctx = { settings, data, error, t, refresh(), save(settings, { rerender }?), prefs }
+//                                 save() stores the settings without redrawing the window (the widget
+//                                 updates its own DOM); { rerender: true } redraws it.
 //                                 The shell already prints the prompt line
 //                                 (`<user>@<machine> ~ % <command>`) above `el`, and a
 //                                 "fetch failed · retry" status line when ctx.error is set.
@@ -22,8 +24,13 @@ import fortune from "./fortune.js";
 import calculator from "./calculator.js";
 import workday from "./workday.js";
 import sysinfo from "./sysinfo.js";
+import timer from "./timer.js";
+import todo from "./todo.js";
+import notes from "./notes.js";
+import habits from "./habits.js";
+import ambient from "./ambient.js";
 
-// Placeholder modules for the default layout; Tasks 6–7 replace them (same ids and meta).
+// Placeholder modules for the default layout; Task 7 replaces them (same ids and meta).
 const placeholder = (meta, defaults = {}) => ({
   meta,
   defaults,
@@ -36,13 +43,13 @@ const placeholder = (meta, defaults = {}) => ({
 
 export const WIDGETS = [
   clock,
-  placeholder({ id: "timer", category: "focus", size: "small", source: "src_computer", command: () => "focus 25m" }),
+  timer,
   placeholder(
     { id: "weather", category: "info", size: "small", source: "src_openMeteo",
       command: (s) => `weather ${String(s?.city ?? "seoul").toLowerCase()}` },
     { city: "Seoul" },
   ),
-  placeholder({ id: "todo", category: "focus", size: "small", source: "src_extension", command: () => "todo" }),
+  todo,
   placeholder(
     { id: "hn", category: "news", size: "wide", source: "src_hn", command: (s) => `hn top ${s?.count ?? 6}` },
     { count: 6 },
@@ -55,7 +62,9 @@ export const WIDGETS = [
   calculator,
   workday,
   sysinfo,
-  placeholder({ id: "notes", category: "focus", size: "small", source: "src_extension", command: () => "vim notes.md" }),
+  notes,
+  habits,
+  ambient,
 ];
 
 const index = new Map(WIDGETS.map((w) => [w.meta.id, w]));

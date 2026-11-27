@@ -37,3 +37,11 @@ export function localArea(prefix = "termtab:") {
     },
   };
 }
+
+let shared = null;
+
+/** The page's storage area: chrome.storage.local, or one shared localStorage area in a
+ *  plain browser preview (so the page and widgets see each other's writes). Call lazily. */
+export function defaultArea() {
+  return globalThis.chrome?.storage?.local ?? (shared ??= localArea());
+}

@@ -39,7 +39,7 @@ export default {
         return;
       }
       refocus = true;
-      ctx.save({ ...ctx.settings, history: pushHistory(history, { expr, result: r.text }) });
+      ctx.save({ ...ctx.settings, history: pushHistory(history, { expr, result: r.text }) }, { rerender: true });
     });
     if (refocus) {
       refocus = false;

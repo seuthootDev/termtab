@@ -364,5 +364,98 @@
   },
   "siUptimeVal": {
     "message": "$1분 $2초"
+  },
+  "w_habits_name": {
+    "message": "습관"
+  },
+  "w_habits_desc": {
+    "message": "이번 주 요일마다 습관을 체크해요"
+  },
+  "w_ambient_name": {
+    "message": "배경 소리"
+  },
+  "w_ambient_desc": {
+    "message": "빗소리, 카페, 화이트·브라운 노이즈를 브라우저에서 만들어요"
+  },
+  "timerFocus": {
+    "message": "집중"
+  },
+  "timerBreak": {
+    "message": "휴식"
+  },
+  "timerStart": {
+    "message": "시작"
+  },
+  "timerPause": {
+    "message": "일시정지"
+  },
+  "timerReset": {
+    "message": "초기화"
+  },
+  "timerToday": {
+    "message": "오늘 $1회 · $2분"
+  },
+  "todoLists": {
+    "message": "할 일 목록"
+  },
+  "todoPlaceholder": {
+    "message": "+ 할 일을 입력하고 엔터를 누르세요"
+  },
+  "todoDoneCount": {
+    "message": "$1/$2 완료"
+  },
+  "todoClearDone": {
+    "message": "완료 항목 지우기"
+  },
+  "todoListName": {
+    "message": "목록 이름"
+  },
+  "todoAddList": {
+    "message": "목록 추가"
+  },
+  "todoDeleteList": {
+    "message": "삭제"
+  },
+  "todoListsBad": {
+    "message": "목록마다 이름이 있어야 하고, 이름이 서로 달라야 해요"
+  },
+  "notesPlaceholder": {
+    "message": "여기에 입력하면 바로바로 저장돼요"
+  },
+  "notesSaved": {
+    "message": "-- 저장됨 --"
+  },
+  "notesEditing": {
+    "message": "-- 입력 중 --"
+  },
+  "habitsLabel": {
+    "message": "습관을 한 줄에 하나씩 (최대 8개)"
+  },
+  "habitsEmpty": {
+    "message": "아직 습관이 없어요. 설정(⋯)에서 추가하세요."
+  },
+  "habitsCell": {
+    "message": "$2 $1"
+  },
+  "ambRain": {
+    "message": "빗소리"
+  },
+  "ambCafe": {
+    "message": "카페"
+  },
+  "ambWhite": {
+    "message": "화이트"
+  },
+  "ambBrown": {
+    "message": "브라운"
+  },
+  "ambPlay": {
+    "message": "재생"
+  },
+  "ambStop": {
+    "message": "정지"
+  },
+  "ambVolume": {
+    "message": "음량"
   }
 }

@@ -8,7 +8,7 @@ import * as timer from "./lib/timer.js";
 import { t, initI18n, uiLanguage } from "./lib/i18n.js";
 import { byId, metaById } from "./widgets/index.js";
 import { $, applyI18n } from "./shell/dom.js";
-import { localArea } from "./shell/local-area.js";
+import { defaultArea } from "./shell/local-area.js";
 import { createOverlays } from "./shell/overlay.js";
 import { createGrid } from "./shell/windows.js";
 import { enableDrag } from "./shell/drag.js";
@@ -17,6 +17,8 @@ import { createMenubar } from "./shell/menubar.js";
 import { createTop } from "./shell/top.js";
 import { createPanels } from "./shell/panels.js";
 import { enableShortcuts } from "./shell/shortcuts.js";
+import { shouldChime, playChime } from "./shell/chime.js";
+import { announceFocusStart } from "./widgets/timer.js";
 
 const DEFAULT_PREFS = { user: "you", machine: "MacBook", clock24: true, searchEngine: "google" };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -28,7 +30,7 @@ async function main() {
   document.title = t("appName");
   applyI18n(document, t);
 
-  const area = globalThis.chrome?.storage?.local ?? localArea();
+  const area = defaultArea();
   const store = createStore(area);
   const cache = createCache({ store });
   const demo = new URLSearchParams(location.search).get("demo") === "1";
@@ -91,7 +93,9 @@ async function main() {
   async function toggleTimer() {
     const now = Date.now();
     const state = timer.tick(await store.get("timer", timer.initial(now)), now).state;
-    await store.set("timer", state.running ? timer.pause(state, now) : timer.start(state, now));
+    const next = state.running ? timer.pause(state, now) : timer.start(state, now);
+    announceFocusStart(next, prefs);
+    await store.set("timer", next);
   }
 
   enableShortcuts({
@@ -117,6 +121,21 @@ async function main() {
       prefs = next;
       applyPrefs();
     }
+  });
+
+  // focus timer: the badge (✓) is cleared by opening a new tab; a session that ends while
+  // this page is open plays a chime, once the page has had a user gesture (autoplay rules)
+  globalThis.chrome?.action?.setBadgeText?.({ text: "" })?.catch?.(() => {});
+  let gesture = false;
+  const onGesture = () => {
+    gesture = true;
+    removeEventListener("pointerdown", onGesture, true);
+    removeEventListener("keydown", onGesture, true);
+  };
+  addEventListener("pointerdown", onGesture, true);
+  addEventListener("keydown", onGesture, true);
+  store.onChange("timer", (v, old) => {
+    if (gesture && shouldChime(v, old)) playChime();
   });
 
   grid.sync(layout);

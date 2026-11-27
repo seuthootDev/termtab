@@ -112,6 +112,13 @@ textarea.inp{min-height:110px;resize:vertical;line-height:1.6}
 /* todo */
 .todo li{display:flex;gap:8px;align-items:baseline;padding:1px 0;cursor:pointer}
 .todo li.done span{color:var(--dim);text-decoration:line-through}
+/* tabs (to-do lists, ambient kinds) */
+.tabs{display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:6px}
+.tabs button{background:none;border:0;padding:0;cursor:pointer;color:var(--dim)}
+.tabs button:hover{color:var(--fg)}
+.tabs button.on{color:var(--yellow)}
+.tabs button.on::before{content:"* "}
+input[type=range]{accent-color:var(--green)}
 /* calendar */
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-variant-numeric:tabular-nums}
 .cal .h{color:var(--dim);font-size:11px}
