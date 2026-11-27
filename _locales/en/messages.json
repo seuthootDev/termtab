@@ -241,5 +241,128 @@
   },
   "prefsClock24": {
     "message": "24-hour clock"
+  },
+  "w_links_name": {
+    "message": "Links"
+  },
+  "w_links_desc": {
+    "message": "Your favorite sites as a quick list"
+  },
+  "w_world_name": {
+    "message": "World clocks"
+  },
+  "w_world_desc": {
+    "message": "Time in other cities, working hours in green"
+  },
+  "w_countdown_name": {
+    "message": "Countdown"
+  },
+  "w_countdown_desc": {
+    "message": "Days left until a date you choose"
+  },
+  "w_fortune_name": {
+    "message": "Fortune"
+  },
+  "w_fortune_desc": {
+    "message": "A programmer quote from a cow"
+  },
+  "w_calculator_name": {
+    "message": "Calculator"
+  },
+  "w_calculator_desc": {
+    "message": "Type an expression, keeps your last 5 results"
+  },
+  "w_workday_name": {
+    "message": "Workday"
+  },
+  "w_workday_desc": {
+    "message": "How much of today's work hours have passed"
+  },
+  "w_sysinfo_name": {
+    "message": "System info"
+  },
+  "w_sysinfo_desc": {
+    "message": "neofetch-style summary of your browser and computer"
+  },
+  "clockWeek": {
+    "message": "week $1"
+  },
+  "linksLabel": {
+    "message": "One link per line: title, then address (http or https only)"
+  },
+  "linksRejected": {
+    "message": "$1 line(s) are not valid http or https addresses"
+  },
+  "worldLabel": {
+    "message": "Time zones, one per line (for example Asia/Seoul)"
+  },
+  "worldBad": {
+    "message": "Unknown time zone: $1"
+  },
+  "countdownName": {
+    "message": "Name"
+  },
+  "countdownDate": {
+    "message": "Date"
+  },
+  "fortuneAnother": {
+    "message": "another"
+  },
+  "calcPlaceholder": {
+    "message": "type an expression and press return"
+  },
+  "calcErrSyntax": {
+    "message": "error: syntax"
+  },
+  "calcErrDivide": {
+    "message": "error: divide by zero"
+  },
+  "calcErrTooLong": {
+    "message": "error: too long"
+  },
+  "wdLeft": {
+    "message": "$1 left"
+  },
+  "wdBefore": {
+    "message": "starts at $1"
+  },
+  "wdAfter": {
+    "message": "done for today"
+  },
+  "wdOff": {
+    "message": "day off"
+  },
+  "wdStart": {
+    "message": "Start"
+  },
+  "wdEnd": {
+    "message": "End"
+  },
+  "wdDays": {
+    "message": "Work days"
+  },
+  "siOs": {
+    "message": "os"
+  },
+  "siBrowser": {
+    "message": "browser"
+  },
+  "siLang": {
+    "message": "lang"
+  },
+  "siScreen": {
+    "message": "screen"
+  },
+  "siCores": {
+    "message": "cores"
+  },
+  "siTabs": {
+    "message": "tabs"
+  },
+  "siUptime": {
+    "message": "uptime"
+  },
+  "siUptimeVal": {
+    "message": "$1m $2s"
   }
 }

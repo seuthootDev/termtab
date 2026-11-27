@@ -241,5 +241,128 @@
   },
   "prefsClock24": {
     "message": "24시간제 시계"
+  },
+  "w_links_name": {
+    "message": "링크"
+  },
+  "w_links_desc": {
+    "message": "즐겨 찾는 사이트를 한눈에"
+  },
+  "w_world_name": {
+    "message": "세계 시계"
+  },
+  "w_world_desc": {
+    "message": "다른 도시의 시간, 업무 시간은 초록색"
+  },
+  "w_countdown_name": {
+    "message": "카운트다운"
+  },
+  "w_countdown_desc": {
+    "message": "정해 둔 날짜까지 남은 일수"
+  },
+  "w_fortune_name": {
+    "message": "오늘의 한마디"
+  },
+  "w_fortune_desc": {
+    "message": "소가 들려주는 개발자 명언"
+  },
+  "w_calculator_name": {
+    "message": "계산기"
+  },
+  "w_calculator_desc": {
+    "message": "수식을 입력하면 최근 결과 5개를 기억해요"
+  },
+  "w_workday_name": {
+    "message": "근무 시간"
+  },
+  "w_workday_desc": {
+    "message": "오늘 근무 시간이 얼마나 지났는지"
+  },
+  "w_sysinfo_name": {
+    "message": "시스템 정보"
+  },
+  "w_sysinfo_desc": {
+    "message": "브라우저와 컴퓨터를 neofetch 스타일로 요약"
+  },
+  "clockWeek": {
+    "message": "$1주차"
+  },
+  "linksLabel": {
+    "message": "한 줄에 링크 하나: 제목, 주소 순서 (http 또는 https만 가능)"
+  },
+  "linksRejected": {
+    "message": "$1개 줄이 올바른 http 또는 https 주소가 아니에요"
+  },
+  "worldLabel": {
+    "message": "시간대를 한 줄에 하나씩 (예: Asia/Seoul)"
+  },
+  "worldBad": {
+    "message": "알 수 없는 시간대: $1"
+  },
+  "countdownName": {
+    "message": "이름"
+  },
+  "countdownDate": {
+    "message": "날짜"
+  },
+  "fortuneAnother": {
+    "message": "다른 말"
+  },
+  "calcPlaceholder": {
+    "message": "수식을 입력하고 엔터를 누르세요"
+  },
+  "calcErrSyntax": {
+    "message": "오류: 문법"
+  },
+  "calcErrDivide": {
+    "message": "오류: 0으로 나눌 수 없어요"
+  },
+  "calcErrTooLong": {
+    "message": "오류: 너무 길어요"
+  },
+  "wdLeft": {
+    "message": "$1 남음"
+  },
+  "wdBefore": {
+    "message": "$1에 시작"
+  },
+  "wdAfter": {
+    "message": "오늘 근무 끝"
+  },
+  "wdOff": {
+    "message": "쉬는 날"
+  },
+  "wdStart": {
+    "message": "시작"
+  },
+  "wdEnd": {
+    "message": "종료"
+  },
+  "wdDays": {
+    "message": "근무 요일"
+  },
+  "siOs": {
+    "message": "os"
+  },
+  "siBrowser": {
+    "message": "browser"
+  },
+  "siLang": {
+    "message": "lang"
+  },
+  "siScreen": {
+    "message": "screen"
+  },
+  "siCores": {
+    "message": "cores"
+  },
+  "siTabs": {
+    "message": "tabs"
+  },
+  "siUptime": {
+    "message": "uptime"
+  },
+  "siUptimeVal": {
+    "message": "$1분 $2초"
   }
 }

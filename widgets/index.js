@@ -13,7 +13,17 @@
 //   settingsForm(settings, t) → HTMLElement dispatching a "save" CustomEvent (detail = settings)
 // Names and descriptions come from _locales: w_<id>_name, w_<id>_desc.
 
-// Placeholder modules for the default layout; Tasks 5–7 replace them (same ids and meta).
+import clock from "./clock.js";
+import links from "./links.js";
+import calendar from "./calendar.js";
+import world from "./world.js";
+import countdown from "./countdown.js";
+import fortune from "./fortune.js";
+import calculator from "./calculator.js";
+import workday from "./workday.js";
+import sysinfo from "./sysinfo.js";
+
+// Placeholder modules for the default layout; Tasks 6–7 replace them (same ids and meta).
 const placeholder = (meta, defaults = {}) => ({
   meta,
   defaults,
@@ -25,7 +35,7 @@ const placeholder = (meta, defaults = {}) => ({
 });
 
 export const WIDGETS = [
-  placeholder({ id: "clock", category: "basics", size: "small", source: "src_computer", command: () => "date" }),
+  clock,
   placeholder({ id: "timer", category: "focus", size: "small", source: "src_computer", command: () => "focus 25m" }),
   placeholder(
     { id: "weather", category: "info", size: "small", source: "src_openMeteo",
@@ -37,7 +47,14 @@ export const WIDGETS = [
     { id: "hn", category: "news", size: "wide", source: "src_hn", command: (s) => `hn top ${s?.count ?? 6}` },
     { count: 6 },
   ),
-  placeholder({ id: "calendar", category: "info", size: "small", source: "src_computer", command: () => "cal" }),
+  calendar,
+  links,
+  world,
+  countdown,
+  fortune,
+  calculator,
+  workday,
+  sysinfo,
   placeholder({ id: "notes", category: "focus", size: "small", source: "src_extension", command: () => "vim notes.md" }),
 ];
 
