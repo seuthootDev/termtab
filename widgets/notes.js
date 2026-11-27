@@ -6,6 +6,20 @@ const DEBOUNCE_MS = 500;
 
 export const clampNotes = (text) => String(text ?? "").slice(0, NOTES_MAX);
 
+/** Call flush when the page goes away (pagehide, or hidden); returns the unbind function. */
+export function bindPageFlush(flush, { win = globalThis, doc = globalThis.document } = {}) {
+  const onHide = () => flush();
+  const onVisibility = () => {
+    if (doc?.visibilityState === "hidden") flush();
+  };
+  win?.addEventListener?.("pagehide", onHide);
+  doc?.addEventListener?.("visibilitychange", onVisibility);
+  return () => {
+    win?.removeEventListener?.("pagehide", onHide);
+    doc?.removeEventListener?.("visibilitychange", onVisibility);
+  };
+}
+
 export default {
   meta: { id: "notes", category: "focus", size: "small", source: "src_extension", command: () => "vim notes.md" },
   defaults: { text: "" },
@@ -29,8 +43,13 @@ export default {
       clearTimeout(timer);
       timer = setTimeout(flush, DEBOUNCE_MS);
     });
+    // keep what was typed in the last half second when the tab closes or is hidden
+    const unbind = bindPageFlush(() => {
+      if (timer) flush();
+    });
     return () => {
-      if (timer) flush(); // keep what was typed in the last half second
+      unbind();
+      if (timer) flush();
     };
   },
 };

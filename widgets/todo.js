@@ -30,7 +30,9 @@ export function toggleItem(s, index) {
 
 export const clearDone = (s) => withActive(s, (items) => items.filter((it) => !it.d));
 
-export const switchList = (s, name) => (s?.lists && name in s.lists ? { ...s, active: name } : s);
+/** Same reference when nothing changes (unknown or already active list), so no save. */
+export const switchList = (s, name) =>
+  (s?.lists && name in s.lists && name !== s.active ? { ...s, active: name } : s);
 
 /**
  * Apply the settings form: rows [{ from: <old name> | null, to: <new name> }] in order.

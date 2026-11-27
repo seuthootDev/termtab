@@ -7,7 +7,6 @@ import { DEMO } from "../demo/data.js";
 import { createSaveTracker } from "./save-tracker.js";
 
 const DEFAULT_TTL = 15 * 60 * 1000;
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
   const mounted = new Map(); // id → window state
@@ -39,8 +38,8 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
     });
     m.unsub.push(store.onChange("settings:" + id, (v) => {
       const next = { ...mod.defaults, ...v };
-      if (ownSaves.isOwn(id, next)) return; // the echo of this tab's ctx.save
-      if (!same(next, m.settings)) applySettings(m, next);
+      // skips the echo of this tab's own save; a foreign change drops pending own saves
+      if (ownSaves.onIncoming(id, m.settings, next)) applySettings(m, next);
     }));
     mounted.set(id, m);
     m.ready = store.get("settings:" + id, {}).then((s) => {
@@ -163,12 +162,15 @@ export function createGrid({ grid, store, cache, demo, t, getPrefs, actions }) {
   async function saveSettings(id, settings, { rerender = true } = {}) {
     const m = mounted.get(id);
     const next = { ...(m?.mod.defaults ?? byId(id)?.defaults), ...settings };
-    if (m && rerender) applySettings(m, next);
-    else if (m) {
-      m.settings = next;
-      m.cmd.replaceChildren(prompt(getPrefs(), m.mod.meta.command(next))); // e.g. `todo home`
+    if (m) {
+      // nothing changed: no write (Chrome would send no echo to match the pending entry)
+      if (!ownSaves.beforeSave(id, m.settings, next)) return;
+      if (rerender) applySettings(m, next);
+      else {
+        m.settings = next;
+        m.cmd.replaceChildren(prompt(getPrefs(), m.mod.meta.command(next))); // e.g. `todo home`
+      }
     }
-    ownSaves.mark(id, next);
     await store.set("settings:" + id, next);
   }
 

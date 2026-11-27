@@ -1,9 +1,15 @@
 // Remembers the settings this tab saved per widget, so the storage echo of its own save
 // does not re-render the window (which would drop the caret in notes and to-do inputs).
-// Echoes may arrive late or out of order, so every pending save is kept until it is seen.
+//
+// Chrome fires storage.onChanged only when a value really changes, and delivers changes
+// in order. So: a save that changes nothing is neither written nor marked (it would get no
+// echo and its entry would linger), and a foreign change clears the id's pending entries
+// (every earlier own echo has already arrived by then).
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
 export function createSaveTracker(max = 20) {
   const pending = new Map(); // id → [json]
-  return {
+  const tracker = {
     mark(id, value) {
       const list = pending.get(id) ?? [];
       list.push(JSON.stringify(value));
@@ -18,5 +24,23 @@ export function createSaveTracker(max = 20) {
       list.splice(i, 1);
       return true;
     },
+    clear(id) {
+      pending.delete(id);
+    },
+    pendingCount: (id) => pending.get(id)?.length ?? 0,
+
+    /** Before writing `next` over the shown `current`: false means skip the write. */
+    beforeSave(id, current, next) {
+      if (same(current, next)) return false;
+      tracker.mark(id, next);
+      return true;
+    },
+    /** A storage change arrived: true means apply (re-render) it. */
+    onIncoming(id, current, next) {
+      if (tracker.isOwn(id, next)) return false;
+      tracker.clear(id);
+      return !same(current, next);
+    },
   };
+  return tracker;
 }

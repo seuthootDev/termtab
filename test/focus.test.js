@@ -327,3 +327,95 @@ test("manifest: an action (for the badge) without a popup", () => {
   assert.equal(m.action?.default_title, "__MSG_appName__");
   assert.equal("default_popup" in m.action, false);
 });
+
+// ---------- fix round 1: echo suppression, todo no-op, notes flush on page close ----------
+import { bindPageFlush } from "../widgets/notes.js";
+
+// Two tabs over one storage that, like chrome.storage, fires onChanged only for real
+// changes and delivers it to every tab in order. Each tab follows the shell's logic.
+function twoTabs(initial) {
+  let stored = initial;
+  const tabs = {};
+  const mk = (name) => ({ name, shown: initial, tracker: createSaveTracker(), renders: 0, writes: 0 });
+  tabs.A = mk("A");
+  tabs.B = mk("B");
+  const save = (tab, next) => {
+    if (!tab.tracker.beforeSave("todo", tab.shown, next)) return;
+    tab.shown = next;
+    tab.writes++;
+    if (JSON.stringify(stored) === JSON.stringify(next)) return; // no onChanged
+    stored = next;
+    for (const t of Object.values(tabs)) {
+      if (t.tracker.onIncoming("todo", t.shown, next)) {
+        t.shown = next;
+        t.renders++;
+      }
+    }
+  };
+  return { tabs, save, stored: () => stored };
+}
+
+test("save tracker: a no-op save is not written and leaves no pending entry", () => {
+  const tr = createSaveTracker();
+  const X = { lists: { work: [] }, active: "work" };
+  assert.equal(tr.beforeSave("todo", X, structuredClone(X)), false);
+  assert.equal(tr.pendingCount("todo"), 0);
+  assert.equal(tr.beforeSave("todo", X, { ...X, active: "home" }), true);
+  assert.equal(tr.pendingCount("todo"), 1);
+});
+
+test("save tracker: a foreign change clears the pending entries", () => {
+  const tr = createSaveTracker();
+  tr.mark("todo", { v: 1 });
+  tr.mark("todo", { v: 2 });
+  assert.equal(tr.onIncoming("todo", { v: 2 }, { v: 9 }), true, "foreign change is applied");
+  assert.equal(tr.pendingCount("todo"), 0);
+  assert.equal(tr.onIncoming("todo", { v: 9 }, { v: 2 }), true, "old own value is no longer swallowed");
+  tr.mark("todo", { v: 3 });
+  assert.equal(tr.onIncoming("todo", { v: 3 }, { v: 3 }), false, "own echo skipped");
+});
+
+test("two tabs: A no-op saves X, B changes to Y and back to X, A ends up showing X", () => {
+  const X = { lists: { work: [{ t: "a", d: false }], home: [] }, active: "work" };
+  const Y = { ...X, active: "home" };
+  const { tabs, save, stored } = twoTabs(X);
+  save(tabs.A, structuredClone(X)); // e.g. clicking the already active tab, or Save unchanged
+  assert.equal(tabs.A.writes, 0);
+  save(tabs.B, Y);
+  assert.deepEqual(tabs.A.shown, Y);
+  save(tabs.B, X);
+  assert.deepEqual(tabs.A.shown, X, "A follows B back to X");
+  assert.deepEqual(stored(), X);
+  // A's next edit builds on X, not on a stale Y
+  save(tabs.A, addItem(tabs.A.shown, "b"));
+  assert.deepEqual(stored().lists.work.map((i) => i.t), ["a", "b"]);
+  assert.equal(stored().active, "work");
+  assert.equal(tabs.A.renders, 2, "A re-rendered for B's two changes, not for its own save");
+  assert.deepEqual(tabs.B.shown, stored());
+});
+
+test("todo: switching to the active list returns the same object, so nothing is saved", () => {
+  const s = { lists: { work: [], home: [] }, active: "work" };
+  assert.equal(switchList(s, "work"), s);
+  assert.equal(switchList(s, "nope"), s);
+  assert.notEqual(switchList(s, "home"), s);
+});
+
+test("notes: pagehide and hidden visibility flush pending text; cleanup removes the listeners", () => {
+  const win = new EventTarget();
+  const doc = new EventTarget();
+  doc.visibilityState = "visible";
+  let flushed = 0;
+  const unbind = bindPageFlush(() => flushed++, { win, doc });
+  win.dispatchEvent(new Event("pagehide"));
+  assert.equal(flushed, 1);
+  doc.dispatchEvent(new Event("visibilitychange")); // still visible
+  assert.equal(flushed, 1);
+  doc.visibilityState = "hidden";
+  doc.dispatchEvent(new Event("visibilitychange"));
+  assert.equal(flushed, 2);
+  unbind();
+  win.dispatchEvent(new Event("pagehide"));
+  doc.dispatchEvent(new Event("visibilitychange"));
+  assert.equal(flushed, 2, "no flush after cleanup");
+});
