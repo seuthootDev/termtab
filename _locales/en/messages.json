@@ -457,5 +457,137 @@
   },
   "ambVolume": {
     "message": "volume"
+  },
+  "src_frankfurter": {
+    "message": "Frankfurter (free)"
+  },
+  "src_coingecko": {
+    "message": "CoinGecko (free)"
+  },
+  "src_devto": {
+    "message": "DEV API"
+  },
+  "src_github": {
+    "message": "GitHub search API"
+  },
+  "src_wikimedia": {
+    "message": "Wikipedia API"
+  },
+  "w_rates_name": {
+    "message": "Exchange rates"
+  },
+  "w_rates_desc": {
+    "message": "KRW against USD, JPY, EUR"
+  },
+  "w_crypto_name": {
+    "message": "Crypto prices"
+  },
+  "w_crypto_desc": {
+    "message": "BTC, ETH and others with 24h change"
+  },
+  "w_devto_name": {
+    "message": "DEV top posts"
+  },
+  "w_devto_desc": {
+    "message": "Popular posts on dev.to this week"
+  },
+  "w_trending_name": {
+    "message": "GitHub trending"
+  },
+  "w_trending_desc": {
+    "message": "Repos that gained the most stars this week"
+  },
+  "w_wiki_name": {
+    "message": "On this day"
+  },
+  "w_wiki_desc": {
+    "message": "Events on today's date in history"
+  },
+  "loading": {
+    "message": "loading…"
+  },
+  "wxClear": {
+    "message": "clear"
+  },
+  "wxPartly": {
+    "message": "partly cloudy"
+  },
+  "wxCloudy": {
+    "message": "cloudy"
+  },
+  "wxFog": {
+    "message": "fog"
+  },
+  "wxRain": {
+    "message": "rain"
+  },
+  "wxSnow": {
+    "message": "snow"
+  },
+  "wxStorm": {
+    "message": "thunderstorm"
+  },
+  "wxHi": {
+    "message": "hi"
+  },
+  "wxLo": {
+    "message": "lo"
+  },
+  "wxWind": {
+    "message": "wind"
+  },
+  "wxHumidity": {
+    "message": "humidity"
+  },
+  "wxNext12": {
+    "message": "next 12h"
+  },
+  "wxTomorrow": {
+    "message": "tomorrow"
+  },
+  "wxCity": {
+    "message": "City"
+  },
+  "wxUnit": {
+    "message": "Temperature unit"
+  },
+  "wxSearch": {
+    "message": "Search"
+  },
+  "wxNoResults": {
+    "message": "No matching city"
+  },
+  "wxSearchFailed": {
+    "message": "Search failed, try again"
+  },
+  "ratesNote": {
+    "message": "ECB reference rates, daily"
+  },
+  "ratesBase": {
+    "message": "Base currency (3 letters, for example KRW)"
+  },
+  "ratesTargets": {
+    "message": "Currencies to show, separated by commas"
+  },
+  "ratesBad": {
+    "message": "Use 3-letter currency codes like USD, JPY"
+  },
+  "cryptoCoins": {
+    "message": "Coin ids, separated by commas (for example bitcoin, ethereum)"
+  },
+  "cryptoVs": {
+    "message": "Price currency (for example usd, krw)"
+  },
+  "cryptoBad": {
+    "message": "Use CoinGecko coin ids and a currency code like usd"
+  },
+  "hnCount": {
+    "message": "Number of stories (1 to 10)"
+  },
+  "wikiLang": {
+    "message": "Language"
+  },
+  "wikiAuto": {
+    "message": "Auto (browser language)"
   }
 }

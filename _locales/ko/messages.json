@@ -457,5 +457,137 @@
   },
   "ambVolume": {
     "message": "음량"
+  },
+  "src_frankfurter": {
+    "message": "Frankfurter (무료)"
+  },
+  "src_coingecko": {
+    "message": "CoinGecko (무료)"
+  },
+  "src_devto": {
+    "message": "DEV API"
+  },
+  "src_github": {
+    "message": "GitHub 검색 API"
+  },
+  "src_wikimedia": {
+    "message": "Wikipedia API"
+  },
+  "w_rates_name": {
+    "message": "환율"
+  },
+  "w_rates_desc": {
+    "message": "원화 대비 USD, JPY, EUR"
+  },
+  "w_crypto_name": {
+    "message": "암호화폐 시세"
+  },
+  "w_crypto_desc": {
+    "message": "BTC, ETH 등과 24시간 변동률"
+  },
+  "w_devto_name": {
+    "message": "DEV 인기 글"
+  },
+  "w_devto_desc": {
+    "message": "이번 주 dev.to 인기 글"
+  },
+  "w_trending_name": {
+    "message": "GitHub 트렌딩"
+  },
+  "w_trending_desc": {
+    "message": "이번 주 별을 가장 많이 받은 저장소"
+  },
+  "w_wiki_name": {
+    "message": "오늘의 역사"
+  },
+  "w_wiki_desc": {
+    "message": "역사 속 오늘 날짜의 사건"
+  },
+  "loading": {
+    "message": "불러오는 중…"
+  },
+  "wxClear": {
+    "message": "맑음"
+  },
+  "wxPartly": {
+    "message": "구름 조금"
+  },
+  "wxCloudy": {
+    "message": "흐림"
+  },
+  "wxFog": {
+    "message": "안개"
+  },
+  "wxRain": {
+    "message": "비"
+  },
+  "wxSnow": {
+    "message": "눈"
+  },
+  "wxStorm": {
+    "message": "뇌우"
+  },
+  "wxHi": {
+    "message": "최고"
+  },
+  "wxLo": {
+    "message": "최저"
+  },
+  "wxWind": {
+    "message": "바람"
+  },
+  "wxHumidity": {
+    "message": "습도"
+  },
+  "wxNext12": {
+    "message": "앞으로 12시간"
+  },
+  "wxTomorrow": {
+    "message": "내일"
+  },
+  "wxCity": {
+    "message": "도시"
+  },
+  "wxUnit": {
+    "message": "온도 단위"
+  },
+  "wxSearch": {
+    "message": "검색"
+  },
+  "wxNoResults": {
+    "message": "일치하는 도시가 없어요"
+  },
+  "wxSearchFailed": {
+    "message": "검색에 실패했어요. 다시 시도해 주세요"
+  },
+  "ratesNote": {
+    "message": "ECB 기준 환율, 하루 한 번 갱신"
+  },
+  "ratesBase": {
+    "message": "기준 통화 (영문 3글자, 예: KRW)"
+  },
+  "ratesTargets": {
+    "message": "표시할 통화, 쉼표로 구분"
+  },
+  "ratesBad": {
+    "message": "USD, JPY처럼 영문 3글자 통화 코드를 입력해 주세요"
+  },
+  "cryptoCoins": {
+    "message": "코인 ID, 쉼표로 구분 (예: bitcoin, ethereum)"
+  },
+  "cryptoVs": {
+    "message": "가격 통화 (예: usd, krw)"
+  },
+  "cryptoBad": {
+    "message": "CoinGecko 코인 ID와 usd 같은 통화 코드를 입력해 주세요"
+  },
+  "hnCount": {
+    "message": "글 개수 (1~10)"
+  },
+  "wikiLang": {
+    "message": "언어"
+  },
+  "wikiAuto": {
+    "message": "자동 (브라우저 언어)"
   }
 }

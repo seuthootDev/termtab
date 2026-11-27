@@ -1,0 +1,72 @@
+{
+ "ids": [
+  50661646,
+  50660180,
+  50659841,
+  50657530,
+  50657265,
+  50657645
+ ],
+ "items": [
+  {
+   "by": "zdw",
+   "descendants": 65,
+   "id": 50661646,
+   "score": 132,
+   "time": 1795742029,
+   "title": "Hard Drive pricing has gotten bad",
+   "type": "story",
+   "url": "https://blog.ktz.me/black-friday-hard-drive-prices-are-messed-up/"
+  },
+  {
+   "by": "jlelse",
+   "descendants": 226,
+   "id": 50660180,
+   "score": 416,
+   "time": 1795729665,
+   "title": "AI made self-hosting fun again",
+   "type": "story",
+   "url": "https://janlukas.blog/posts/ai-self-hosting"
+  },
+  {
+   "by": "dverlaeckt80",
+   "descendants": 61,
+   "id": 50659841,
+   "score": 287,
+   "time": 1795727285,
+   "title": "Kamil Khan Mumtaz: Pakistani architect, admired at home, almost invisible abroad",
+   "type": "story",
+   "url": "https://worksinprogress.co/issue/the-greatest-architect-youve-never-heard-of-is-in-pakistan/"
+  },
+  {
+   "by": "iantongeorge",
+   "descendants": 379,
+   "id": 50657530,
+   "score": 304,
+   "time": 1795714607,
+   "title": "YouTube Ad Punisher – Auto-reloads YouTube pages when an ad plays",
+   "type": "story",
+   "url": "https://github.com/antonpictures/youtube-punisher"
+  },
+  {
+   "by": "julianlam",
+   "descendants": 74,
+   "id": 50657265,
+   "score": 304,
+   "time": 1795713089,
+   "title": "AMD-specific fork of llama.cpp",
+   "type": "story",
+   "url": "https://devnull.land/amd-specific-llama-cpp"
+  },
+  {
+   "by": "Bender",
+   "descendants": 102,
+   "id": 50657645,
+   "score": 235,
+   "time": 1795715265,
+   "title": "CTO of 'RansomwareHelp' indicted for wire fraud",
+   "type": "story",
+   "url": "https://krebsonsecurity.com/2026/11/cto-of-ransomwarehelp-indicted-for-wire-fraud/"
+  }
+ ]
+}

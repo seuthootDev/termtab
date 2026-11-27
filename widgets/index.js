@@ -29,31 +29,20 @@ import todo from "./todo.js";
 import notes from "./notes.js";
 import habits from "./habits.js";
 import ambient from "./ambient.js";
-
-// Placeholder modules for the default layout; Task 7 replaces them (same ids and meta).
-const placeholder = (meta, defaults = {}) => ({
-  meta,
-  defaults,
-  render(el) {
-    const cursor = el.ownerDocument.createElement("span");
-    cursor.className = "cursor";
-    el.append(cursor);
-  },
-});
+import weather from "./weather.js";
+import rates from "./rates.js";
+import crypto from "./crypto.js";
+import hn from "./hn.js";
+import devto from "./devto.js";
+import trending from "./trending.js";
+import wiki from "./wiki.js";
 
 export const WIDGETS = [
   clock,
   timer,
-  placeholder(
-    { id: "weather", category: "info", size: "small", source: "src_openMeteo",
-      command: (s) => `weather ${String(s?.city ?? "seoul").toLowerCase()}` },
-    { city: "Seoul" },
-  ),
+  weather,
   todo,
-  placeholder(
-    { id: "hn", category: "news", size: "wide", source: "src_hn", command: (s) => `hn top ${s?.count ?? 6}` },
-    { count: 6 },
-  ),
+  hn,
   calendar,
   links,
   world,
@@ -65,6 +54,11 @@ export const WIDGETS = [
   notes,
   habits,
   ambient,
+  rates,
+  crypto,
+  devto,
+  trending,
+  wiki,
 ];
 
 const index = new Map(WIDGETS.map((w) => [w.meta.id, w]));
