@@ -1,4 +1,245 @@
 {
-  "appName": { "message": "termtab" },
-  "appDescription": { "message": "새 탭을 macOS 터미널처럼. 위젯, 집중 타이머, 날씨와 뉴스까지 모두 무료." }
+  "appName": {
+    "message": "termtab"
+  },
+  "appDescription": {
+    "message": "새 탭을 macOS 터미널처럼. 위젯, 집중 타이머, 날씨와 뉴스까지 모두 무료."
+  },
+  "menuBar": {
+    "message": "메뉴 막대"
+  },
+  "menuTerminal": {
+    "message": "터미널"
+  },
+  "menuWidgets": {
+    "message": "위젯…"
+  },
+  "menuPreferences": {
+    "message": "환경설정…"
+  },
+  "menuAbout": {
+    "message": "termtab에 관하여"
+  },
+  "menuShell": {
+    "message": "셸"
+  },
+  "menuEdit": {
+    "message": "편집"
+  },
+  "menuView": {
+    "message": "보기"
+  },
+  "menuWindow": {
+    "message": "윈도우"
+  },
+  "menuHelp": {
+    "message": "도움말"
+  },
+  "menuClock": {
+    "message": "$3 $2일 ($1)  $4"
+  },
+  "greetLabel": {
+    "message": "인사와 오늘의 목표"
+  },
+  "greetMorning": {
+    "message": "좋은 아침이에요, $1"
+  },
+  "greetAfternoon": {
+    "message": "좋은 오후예요, $1"
+  },
+  "greetEvening": {
+    "message": "좋은 저녁이에요, $1"
+  },
+  "greetNight": {
+    "message": "편안한 밤 보내세요, $1"
+  },
+  "focusLabel": {
+    "message": "목표:"
+  },
+  "focusPlaceholder": {
+    "message": "오늘 가장 집중할 일은 무엇인가요?"
+  },
+  "searchLabel": {
+    "message": "검색"
+  },
+  "searchPlaceholder": {
+    "message": "입력하고 Enter를 누르세요"
+  },
+  "searchAria": {
+    "message": "웹 검색"
+  },
+  "searchEngine": {
+    "message": "검색 엔진"
+  },
+  "engineGoogle": {
+    "message": "google"
+  },
+  "engineDuckDuckGo": {
+    "message": "ddg"
+  },
+  "engineNaver": {
+    "message": "naver"
+  },
+  "engineGitHub": {
+    "message": "github"
+  },
+  "widgetsButton": {
+    "message": "＋ 위젯"
+  },
+  "widgetCount": {
+    "message": "($1/$2)"
+  },
+  "drawerLabel": {
+    "message": "위젯"
+  },
+  "drawerSource": {
+    "message": "데이터: $1"
+  },
+  "done": {
+    "message": "완료"
+  },
+  "save": {
+    "message": "저장"
+  },
+  "winClose": {
+    "message": "$1 닫기"
+  },
+  "winMinimize": {
+    "message": "$1 최소화"
+  },
+  "winRestore": {
+    "message": "$1 복원"
+  },
+  "winWiden": {
+    "message": "$1 넓게"
+  },
+  "winNarrow": {
+    "message": "$1 좁게"
+  },
+  "winSettings": {
+    "message": "$1 설정"
+  },
+  "winSettingsTitle": {
+    "message": "설정"
+  },
+  "winTitleBar": {
+    "message": "$1 윈도우. 드래그하거나 Alt+←/→로 이동"
+  },
+  "fetchFailed": {
+    "message": "가져오기 실패"
+  },
+  "retry": {
+    "message": "다시 시도"
+  },
+  "widgetError": {
+    "message": "이 위젯에서 오류가 났어요"
+  },
+  "emptyGrid": {
+    "message": "열린 윈도우가 없어요. ＋ 위젯을 눌러 추가하세요."
+  },
+  "cat_basics": {
+    "message": "기본"
+  },
+  "cat_focus": {
+    "message": "집중과 생산성"
+  },
+  "cat_info": {
+    "message": "정보"
+  },
+  "cat_news": {
+    "message": "뉴스와 피드"
+  },
+  "cat_fun": {
+    "message": "재미"
+  },
+  "src_computer": {
+    "message": "내 컴퓨터"
+  },
+  "src_extension": {
+    "message": "확장 프로그램에 저장"
+  },
+  "src_openMeteo": {
+    "message": "Open-Meteo (무료, 키 불필요)"
+  },
+  "src_hn": {
+    "message": "Hacker News API"
+  },
+  "w_clock_name": {
+    "message": "시계"
+  },
+  "w_clock_desc": {
+    "message": "큰 시계와 날짜, ISO 주차"
+  },
+  "w_timer_name": {
+    "message": "집중 타이머"
+  },
+  "w_timer_desc": {
+    "message": "뽀모도로: 25분 집중, 5분 휴식, 오늘 횟수 기록"
+  },
+  "w_weather_name": {
+    "message": "날씨"
+  },
+  "w_weather_desc": {
+    "message": "현재 날씨, 오늘 최고·최저, 앞으로 12시간"
+  },
+  "w_todo_name": {
+    "message": "할 일"
+  },
+  "w_todo_desc": {
+    "message": "간단한 할 일, 클릭해서 완료"
+  },
+  "w_hn_name": {
+    "message": "Hacker News"
+  },
+  "w_hn_desc": {
+    "message": "인기 글과 점수"
+  },
+  "w_calendar_name": {
+    "message": "달력"
+  },
+  "w_calendar_desc": {
+    "message": "이번 달, 오늘 강조"
+  },
+  "w_notes_name": {
+    "message": "메모"
+  },
+  "w_notes_desc": {
+    "message": "입력하는 대로 저장되는 메모장"
+  },
+  "helpNameHead": {
+    "message": "이름"
+  },
+  "helpShortcutsHead": {
+    "message": "단축키"
+  },
+  "helpSearch": {
+    "message": "검색창으로 이동"
+  },
+  "helpNotes": {
+    "message": "메모 열기"
+  },
+  "helpTimer": {
+    "message": "집중 타이머 시작/일시정지"
+  },
+  "helpHelp": {
+    "message": "이 도움말 보기"
+  },
+  "helpEsc": {
+    "message": "윈도우, 메뉴, 위젯 서랍 닫기"
+  },
+  "helpMove": {
+    "message": "포커스된 윈도우 이동 (제목 막대에서)"
+  },
+  "aboutFree": {
+    "message": "무료 오픈 소스(MIT). 계정도 추적도 없어요."
+  },
+  "prefsUser": {
+    "message": "프롬프트에 표시할 이름"
+  },
+  "prefsMachine": {
+    "message": "컴퓨터 이름"
+  },
+  "prefsClock24": {
+    "message": "24시간제 시계"
+  }
 }

@@ -1,11 +1,59 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>termtab</title>
 <link rel="stylesheet" href="newtab.css">
 </head>
 <body>
+<nav class="menubar" data-i18n-aria-label="menuBar">
+  <div class="menu">
+    <button class="mbtn" id="menu-terminal" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-dd"><b data-i18n="menuTerminal"></b></button>
+    <div class="dropdown" id="menu-dd" role="menu" hidden>
+      <button type="button" role="menuitem" data-action="widgets" data-i18n="menuWidgets"></button>
+      <button type="button" role="menuitem" data-action="prefs" data-i18n="menuPreferences"></button>
+      <hr>
+      <button type="button" role="menuitem" data-action="about" data-i18n="menuAbout"></button>
+    </div>
+  </div>
+  <span class="m" data-i18n="menuShell"></span><span class="m" data-i18n="menuEdit"></span><span class="m" data-i18n="menuView"></span><span class="m" data-i18n="menuWindow"></span><span class="m" data-i18n="menuHelp"></span>
+  <span class="sp"></span><span id="menuclock"></span>
+</nav>
+
+<main class="wrap">
+  <section class="greet" id="greet" data-i18n-aria-label="greetLabel">
+    <div class="gl" id="greet-echo"></div>
+    <label class="gl focus"><span class="y" data-i18n="focusLabel"></span> <input id="focus" type="text" autocomplete="off" maxlength="200" data-i18n-placeholder="focusPlaceholder"></label>
+  </section>
+
+  <div class="top">
+    <section class="win" data-i18n-aria-label="searchLabel">
+      <div class="ph"><div class="tl" aria-hidden="true"><i class="r"></i><i class="yb"></i><i class="gb"></i></div><span class="t" id="search-title"></span></div>
+      <form class="search" id="search" role="search">
+        <span class="nw" id="search-prompt"></span>
+        <input id="q" type="text" autocomplete="off" data-i18n-placeholder="searchPlaceholder" data-i18n-aria-label="searchAria">
+        <select id="engine" data-i18n-aria-label="searchEngine">
+          <option value="google" data-i18n="engineGoogle"></option>
+          <option value="duckduckgo" data-i18n="engineDuckDuckGo"></option>
+          <option value="naver" data-i18n="engineNaver"></option>
+          <option value="github" data-i18n="engineGitHub"></option>
+        </select>
+      </form>
+    </section>
+    <button class="tbtn" id="open" type="button" aria-expanded="false" aria-controls="drawer"><span data-i18n="widgetsButton"></span> <span id="count" class="cnt"></span></button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden data-i18n-aria-label="drawerLabel">
+  <div class="dh"><span id="drawer-prompt"></span><button class="sbtn" id="close" type="button" data-i18n="done"></button></div>
+  <div class="dl" id="list"></div>
+</aside>
+
+<div id="modals"></div>
 <script type="module" src="newtab.js"></script>
 </body>
 </html>

@@ -1,4 +1,245 @@
 {
-  "appName": { "message": "termtab" },
-  "appDescription": { "message": "Your new tab as a macOS Terminal: widgets, focus timer, weather and news. Free." }
+  "appName": {
+    "message": "termtab"
+  },
+  "appDescription": {
+    "message": "Your new tab as a macOS Terminal: widgets, focus timer, weather and news. Free."
+  },
+  "menuBar": {
+    "message": "Menu bar"
+  },
+  "menuTerminal": {
+    "message": "Terminal"
+  },
+  "menuWidgets": {
+    "message": "Widgets…"
+  },
+  "menuPreferences": {
+    "message": "Preferences…"
+  },
+  "menuAbout": {
+    "message": "About termtab"
+  },
+  "menuShell": {
+    "message": "Shell"
+  },
+  "menuEdit": {
+    "message": "Edit"
+  },
+  "menuView": {
+    "message": "View"
+  },
+  "menuWindow": {
+    "message": "Window"
+  },
+  "menuHelp": {
+    "message": "Help"
+  },
+  "menuClock": {
+    "message": "$1 $2 $3  $4"
+  },
+  "greetLabel": {
+    "message": "Greeting and today's focus"
+  },
+  "greetMorning": {
+    "message": "Good morning, $1"
+  },
+  "greetAfternoon": {
+    "message": "Good afternoon, $1"
+  },
+  "greetEvening": {
+    "message": "Good evening, $1"
+  },
+  "greetNight": {
+    "message": "Good night, $1"
+  },
+  "focusLabel": {
+    "message": "focus:"
+  },
+  "focusPlaceholder": {
+    "message": "what is your main focus today?"
+  },
+  "searchLabel": {
+    "message": "Search"
+  },
+  "searchPlaceholder": {
+    "message": "type and press return"
+  },
+  "searchAria": {
+    "message": "Search the web"
+  },
+  "searchEngine": {
+    "message": "Search engine"
+  },
+  "engineGoogle": {
+    "message": "google"
+  },
+  "engineDuckDuckGo": {
+    "message": "ddg"
+  },
+  "engineNaver": {
+    "message": "naver"
+  },
+  "engineGitHub": {
+    "message": "github"
+  },
+  "widgetsButton": {
+    "message": "＋ Widgets"
+  },
+  "widgetCount": {
+    "message": "($1/$2)"
+  },
+  "drawerLabel": {
+    "message": "Widgets"
+  },
+  "drawerSource": {
+    "message": "data: $1"
+  },
+  "done": {
+    "message": "Done"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "winClose": {
+    "message": "Close $1"
+  },
+  "winMinimize": {
+    "message": "Minimize $1"
+  },
+  "winRestore": {
+    "message": "Restore $1"
+  },
+  "winWiden": {
+    "message": "Make $1 wide"
+  },
+  "winNarrow": {
+    "message": "Make $1 narrow"
+  },
+  "winSettings": {
+    "message": "$1 settings"
+  },
+  "winSettingsTitle": {
+    "message": "settings"
+  },
+  "winTitleBar": {
+    "message": "$1 window. Drag to move, or Alt+Left/Right"
+  },
+  "fetchFailed": {
+    "message": "fetch failed"
+  },
+  "retry": {
+    "message": "retry"
+  },
+  "widgetError": {
+    "message": "this widget hit an error"
+  },
+  "emptyGrid": {
+    "message": "No windows open. Press ＋ Widgets to add some."
+  },
+  "cat_basics": {
+    "message": "basics"
+  },
+  "cat_focus": {
+    "message": "focus & productivity"
+  },
+  "cat_info": {
+    "message": "information"
+  },
+  "cat_news": {
+    "message": "news & feeds"
+  },
+  "cat_fun": {
+    "message": "fun"
+  },
+  "src_computer": {
+    "message": "your computer"
+  },
+  "src_extension": {
+    "message": "saved in the extension"
+  },
+  "src_openMeteo": {
+    "message": "Open-Meteo (free, no key)"
+  },
+  "src_hn": {
+    "message": "Hacker News API"
+  },
+  "w_clock_name": {
+    "message": "Clock"
+  },
+  "w_clock_desc": {
+    "message": "Big time and date, ISO week"
+  },
+  "w_timer_name": {
+    "message": "Focus timer"
+  },
+  "w_timer_desc": {
+    "message": "Pomodoro: 25 min focus, 5 min break, keeps a daily count"
+  },
+  "w_weather_name": {
+    "message": "Weather"
+  },
+  "w_weather_desc": {
+    "message": "Now, today's range and the next 12 hours"
+  },
+  "w_todo_name": {
+    "message": "To-do"
+  },
+  "w_todo_desc": {
+    "message": "Quick tasks, click to check off"
+  },
+  "w_hn_name": {
+    "message": "Hacker News"
+  },
+  "w_hn_desc": {
+    "message": "Top stories with points"
+  },
+  "w_calendar_name": {
+    "message": "Calendar"
+  },
+  "w_calendar_desc": {
+    "message": "This month, today highlighted"
+  },
+  "w_notes_name": {
+    "message": "Notes"
+  },
+  "w_notes_desc": {
+    "message": "A scratchpad that saves as you type"
+  },
+  "helpNameHead": {
+    "message": "NAME"
+  },
+  "helpShortcutsHead": {
+    "message": "SHORTCUTS"
+  },
+  "helpSearch": {
+    "message": "focus the search"
+  },
+  "helpNotes": {
+    "message": "open notes"
+  },
+  "helpTimer": {
+    "message": "start or pause the focus timer"
+  },
+  "helpHelp": {
+    "message": "show this help"
+  },
+  "helpEsc": {
+    "message": "close windows, menus and the drawer"
+  },
+  "helpMove": {
+    "message": "move the focused window (on its title bar)"
+  },
+  "aboutFree": {
+    "message": "Free and open source (MIT). No account, no tracking."
+  },
+  "prefsUser": {
+    "message": "Your name in the prompt"
+  },
+  "prefsMachine": {
+    "message": "Machine name"
+  },
+  "prefsClock24": {
+    "message": "24-hour clock"
+  }
 }
