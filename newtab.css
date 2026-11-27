@@ -13,6 +13,7 @@
 [hidden]{display:none!important}
 html{background:var(--desk1)}
 body{background:radial-gradient(1200px 700px at 15% 0%,var(--desk2),transparent 60%),radial-gradient(1000px 800px at 100% 100%,var(--desk3),transparent 60%),var(--desk1);background-attachment:fixed;color:var(--fg);font:12.5px/1.6 var(--mono);margin:0;min-height:100vh}
+pre,code,kbd,samp{font-family:var(--mono);font-size:inherit}
 
 /* menu bar */
 .menubar{position:sticky;top:0;z-index:25;display:flex;align-items:center;gap:18px;height:28px;padding:0 16px;background:rgb(30 30 30/.72);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);border-bottom:1px solid rgb(255 255 255/.06);font:13px/1 var(--ui);color:#e8e8e8;white-space:nowrap}

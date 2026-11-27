@@ -120,3 +120,11 @@ test("calendar cells mark today", () => {
   assert.equal(cells.find((c) => c.today).day, 27);
   assert.equal(cells.filter((c) => c.day).length, 30);
 });
+
+test("newtab.css gives pre/code the mono stack (no browser default monospace, which draws \ as a won sign in ko)", async () => {
+  const { readFileSync } = await import("node:fs");
+  const css = readFileSync(new URL("../newtab.css", import.meta.url), "utf8");
+  const rule = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)].find(([, sel, body]) =>
+    /(^|,)\s*pre\s*(,|$)/.test(sel.trim()) && /font-family:\s*var\(--mono\)|font:\s*inherit/.test(body));
+  assert.ok(rule, "a rule for pre with font-family: var(--mono) or font: inherit");
+});
