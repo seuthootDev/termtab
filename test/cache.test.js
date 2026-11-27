@@ -29,14 +29,25 @@ function fakeArea() {
   };
 }
 
-function setup(t0 = 1_000_000) {
+
+function fakeLocks() {
+  const held = new Set();
+  return {
+    async request(name, opts, cb) {
+      if (opts.ifAvailable && held.has(name)) return cb(null);
+      held.add(name);
+      try { return await cb({ name }); } finally { held.delete(name); }
+    },
+  };
+}
+
+function setup(t0 = 1_000_000, extra = {}) {
   const local = fakeArea();
-  const sess = fakeArea();
   const clock = { t: t0 };
   const store = createStore(local);
-  const session = createStore(sess);
-  const cache = createCache({ store, session, now: () => clock.t });
-  return { local, sess, clock, store, session, cache };
+  const locks = fakeLocks();
+  const cache = createCache({ store, locks, now: () => clock.t, ...extra });
+  return { local, clock, store, locks, cache };
 }
 
 const K = 'cache:weather:abc';
@@ -63,7 +74,7 @@ test('missing entry returns null and fetches in background', async () => {
 });
 
 test('stale entry: old value first, fetcher once, onUpdate gets new value', async () => {
-  const { cache, store, session, clock } = setup();
+  const { cache, store, clock } = setup();
   await store.set(K, { value: 'old', fetchedAt: clock.t - 100_000, error: false });
   let calls = 0;
   const updates = [];
@@ -72,11 +83,10 @@ test('stale entry: old value first, fetcher once, onUpdate gets new value', asyn
   await cache.pending(K);
   assert.equal(calls, 1);
   assert.deepEqual(updates, [{ value: 'new', fetchedAt: clock.t, error: false }]);
-  assert.equal(await session.get('lock:' + K, null), null);
 });
 
 test('cache keeps the old value when the fetch fails', async () => {
-  const { cache, store, session, clock } = setup();
+  const { cache, store, clock } = setup();
   const old = { value: 'old', fetchedAt: clock.t - 100_000, error: false };
   await store.set(K, old);
   const updates = [];
@@ -89,7 +99,6 @@ test('cache keeps the old value when the fetch fails', async () => {
   assert.equal(stored.error, true);
   assert.equal(updates.length, 1);
   assert.equal(updates[0].error, true);
-  assert.equal(await session.get('lock:' + K, null), null);
 });
 
 test('failure with no old entry stores an empty error entry', async () => {
@@ -99,50 +108,91 @@ test('failure with no old entry stores an empty error entry', async () => {
   assert.deepEqual(await store.get(K), { value: null, fetchedAt: 0, error: true });
 });
 
-test('concurrent gets share one fetch (same page)', async () => {
+test('concurrent gets share one fetch', async () => {
   const { cache } = setup();
   let calls = 0;
   let release;
   const gate = new Promise((r) => { release = r; });
   const fetcher = async () => { calls++; await gate; return 'v'; };
-  const updates = [];
-  const p1 = cache.get(K, 1000, fetcher, (e) => updates.push(e));
-  const p2 = cache.get(K, 1000, fetcher, (e) => updates.push(e));
+  const p1 = cache.get(K, 1000, fetcher, () => {});
+  const p2 = cache.get(K, 1000, fetcher, () => {});
   await Promise.all([p1, p2]);
   release();
   await cache.pending(K);
   assert.equal(calls, 1);
-  assert.ok(updates.length >= 1);
 });
 
-test('concurrent gets share one fetch (two tabs, session lock)', async () => {
-  const { store, session, clock } = setup();
-  const tabA = createCache({ store, session, now: () => clock.t });
-  const tabB = createCache({ store, session, now: () => clock.t });
+test('ten caches (tabs) get in the same tick: fetcher called once', async () => {
+  const store = createStore(fakeArea());
+  const locks = fakeLocks();
+  const caches = Array.from({ length: 10 }, () => createCache({ store, locks }));
   let calls = 0;
   let release;
   const gate = new Promise((r) => { release = r; });
   const fetcher = async () => { calls++; await gate; return 'v'; };
-  await tabA.get(K, 1000, fetcher, () => {});
-  await tabB.get(K, 1000, fetcher, () => {});
+  const gets = caches.map((c) => c.get(K, 1000, fetcher, () => {}));
+  await Promise.all(gets);
   release();
-  await tabA.pending(K);
-  await tabB.pending(K);
+  await Promise.all(caches.map((c) => c.pending(K)));
+  assert.equal(calls, 1);
+  assert.equal((await store.get(K)).value, 'v');
+});
+
+test('a fetcher that never settles times out, keeps old value, can retry', async () => {
+  const { cache, store, clock } = setup(1_000_000, { timeoutMs: 50 });
+  await store.set(K, { value: 'old', fetchedAt: clock.t - 100_000, error: false });
+  const updates = [];
+  await cache.get(K, 1000, () => new Promise(() => {}), (e) => updates.push(e));
+  await cache.pending(K);
+  const stored = await store.get(K);
+  assert.equal(stored.value, 'old');
+  assert.equal(stored.error, true);
+  assert.equal(updates.length, 1);
+  assert.equal(cache.pending(K), undefined);
+  let calls = 0;
+  await cache.get(K, 1000, async () => { calls++; return 'new'; }, () => {});
+  await cache.pending(K);
+  assert.equal(calls, 1);
+  assert.equal((await store.get(K)).value, 'new');
+});
+
+test('store.set rejecting still calls onUpdate, resolves pending, clears inflight', async () => {
+  const real = createStore(fakeArea());
+  let failSet = true;
+  const store = {
+    get: real.get,
+    set: async (k, v) => { if (failSet) throw new Error('quota'); return real.set(k, v); },
+  };
+  const cache = createCache({ store, locks: fakeLocks() });
+  const updates = [];
+  await cache.get(K, 1000, async () => 'v', (e) => updates.push(e));
+  await cache.pending(K);
+  assert.equal(updates.length, 1);
+  assert.equal(updates[0].value, 'v');
+  assert.equal(cache.pending(K), undefined);
+  failSet = false;
+  let calls = 0;
+  await cache.get(K, 1000, async () => { calls++; return 'w'; }, () => {});
+  await cache.pending(K);
   assert.equal(calls, 1);
 });
 
-test('a lock older than 30 s is ignored; younger one blocks', async () => {
-  const { cache, session, clock } = setup();
+test('an entry refreshed by another tab before the lock is acquired: no fetch', async () => {
+  const store = createStore(fakeArea());
+  const inner = fakeLocks();
+  const clock = { t: 1_000_000 };
+  const locks = {
+    async request(name, opts, cb) {
+      await store.set(K, { value: 'other', fetchedAt: clock.t, error: false });
+      return inner.request(name, opts, cb);
+    },
+  };
+  const cache = createCache({ store, locks, now: () => clock.t });
   let calls = 0;
-  const fetcher = async () => { calls++; return 'v'; };
-  await session.set('lock:' + K, clock.t - 29_999);
-  await cache.get(K, 1000, fetcher, () => {});
+  await cache.get(K, 60_000, async () => { calls++; return 'mine'; }, () => {});
   await cache.pending(K);
   assert.equal(calls, 0);
-  await session.set('lock:' + K, clock.t - 30_001);
-  await cache.get(K, 1000, fetcher, () => {});
-  await cache.pending(K);
-  assert.equal(calls, 1);
+  assert.equal((await store.get(K)).value, 'other');
 });
 
 test('pending is cleared after settle', async () => {
