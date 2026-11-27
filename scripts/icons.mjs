@@ -4,7 +4,9 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { deflateSync } from 'node:zlib';
 import { Resvg } from '@resvg/resvg-js';
+import { crc32 } from './zip.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const C = { win: '#1e1e1e', bar: '#2e2e2e', edge: '#4a4a4a', text: '#d4d4d4', green: '#98c379', r: '#ff5f57', y: '#febc2e', g: '#28c840' };
@@ -50,6 +52,29 @@ function promoSvg() {
 `;
 }
 
+// The Chrome Web Store wants promo tiles as 24-bit PNG without alpha: drop the alpha channel
+// (the artwork is fully opaque) and write an RGB PNG.
+function opaquePng(svg, width) {
+  const img = new Resvg(svg, { fitTo: { mode: 'width', value: width }, font: { loadSystemFonts: true } }).render();
+  const { width: w, height: h, pixels } = img;
+  const raw = Buffer.alloc(h * (1 + w * 3));
+  for (let y = 0; y < h; y++) {
+    raw[y * (1 + w * 3)] = 0;
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4, o = y * (1 + w * 3) + 1 + x * 3;
+      raw[o] = pixels[i]; raw[o + 1] = pixels[i + 1]; raw[o + 2] = pixels[i + 2];
+    }
+  }
+  const chunk = (type, data) => {
+    const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
+    const td = Buffer.concat([Buffer.from(type), data]);
+    const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td) >>> 0);
+    return Buffer.concat([len, td, crc]);
+  };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 2;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
+
 const png = (svg, width) => new Resvg(svg, { fitTo: { mode: 'width', value: width }, font: { loadSystemFonts: true } }).render().asPng();
 
 writeFileSync(join(root, 'icons', 'icon.svg'), iconSvg(128));
@@ -58,7 +83,7 @@ for (const size of [16, 32, 48, 128]) {
   console.log(`icons/icon-${size}.png`);
 }
 mkdirSync(join(root, 'store'), { recursive: true });
-writeFileSync(join(root, 'store', 'promo-440x280.png'), png(promoSvg(), 440));
+writeFileSync(join(root, 'store', 'promo-440x280.png'), opaquePng(promoSvg(), 440));
 console.log('store/promo-440x280.png');
 // A zoomed preview of the small sizes for review (not committed).
 if (process.argv.includes('--preview')) {
