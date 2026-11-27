@@ -71,15 +71,6 @@
   "searchEngine": {
     "message": "Search engine"
   },
-  "engineGoogle": {
-    "message": "google"
-  },
-  "engineDuckDuckGo": {
-    "message": "ddg"
-  },
-  "engineNaver": {
-    "message": "naver"
-  },
   "engineGitHub": {
     "message": "github"
   },
@@ -688,5 +679,9 @@
   },
   "prefsImportNote": {
     "message": "Import merges the file into your current settings: anything the file leaves out stays as it is."
+  },
+  "engineDefault": {
+    "message": "default",
+    "description": "Search dropdown: the user's default Chrome search engine"
   }
 }

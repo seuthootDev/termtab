@@ -2,12 +2,18 @@
 import { $, prompt, title, today } from "./dom.js";
 import { greeting } from "../lib/dates.js";
 
-export const ENGINES = {
-  google: "https://www.google.com/search?q=",
-  duckduckgo: "https://duckduckgo.com/?q=",
-  naver: "https://search.naver.com/search.naver?query=",
-  github: "https://github.com/search?q=",
-};
+// Web search goes to the user's own default engine through chrome.search (Chrome Web Store
+// policy for new tab pages). GitHub is the one platform search offered next to it.
+export const GITHUB_SEARCH = "https://github.com/search?q=";
+export const engineId = (v) => (v === "github" ? "github" : "default");
+
+// What a search does: open a URL, or hand the text to the default provider.
+export function searchAction(engine, query, hasChromeSearch) {
+  if (engineId(engine) === "github") return { url: GITHUB_SEARCH + encodeURIComponent(query) };
+  if (hasChromeSearch) return { defaultProvider: query };
+  // outside the extension (plain page during development) there is no chrome.search
+  return { url: "https://www.google.com/search?q=" + encodeURIComponent(query) };
+}
 
 export function createTop({ t, store, getPrefs, setPrefs }) {
   const echo = $("#greet-echo");
@@ -57,7 +63,9 @@ export function createTop({ t, store, getPrefs, setPrefs }) {
     e.preventDefault();
     const query = q.value.trim();
     if (!query) return;
-    location.href = (ENGINES[engine.value] ?? ENGINES.google) + encodeURIComponent(query);
+    const action = searchAction(engine.value, query, Boolean(globalThis.chrome?.search?.query));
+    if (action.url) location.href = action.url;
+    else chrome.search.query({ text: action.defaultProvider, disposition: "CURRENT_TAB" });
   });
   engine.addEventListener("change", () => setPrefs({ ...getPrefs(), searchEngine: engine.value }));
 
@@ -66,7 +74,7 @@ export function createTop({ t, store, getPrefs, setPrefs }) {
     drawGreeting();
     $("#search-prompt").replaceChildren(prompt(prefs, "search"));
     $("#search-title").replaceChildren(...title(prefs, "search", "80×1"));
-    engine.value = ENGINES[prefs.searchEngine] ? prefs.searchEngine : "google";
+    engine.value = engineId(prefs.searchEngine);
   }
 
   // every minute: greeting part and the day of the focus line can change

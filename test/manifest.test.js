@@ -13,7 +13,7 @@ test('manifest is MV3 with the new tab override', () => {
 });
 
 test('permissions are exactly the allowed set, no host permissions', () => {
-  assert.deepEqual([...manifest.permissions].sort(), ['alarms', 'storage', 'system.cpu', 'system.memory']);
+  assert.deepEqual([...manifest.permissions].sort(), ['alarms', 'search', 'storage', 'system.cpu', 'system.memory']);
   assert.equal('host_permissions' in manifest, false);
   assert.equal('optional_host_permissions' in manifest, false);
 });

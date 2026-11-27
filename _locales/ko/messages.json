@@ -71,15 +71,6 @@
   "searchEngine": {
     "message": "검색 엔진"
   },
-  "engineGoogle": {
-    "message": "google"
-  },
-  "engineDuckDuckGo": {
-    "message": "ddg"
-  },
-  "engineNaver": {
-    "message": "naver"
-  },
   "engineGitHub": {
     "message": "github"
   },
@@ -688,5 +679,9 @@
   },
   "prefsImportNote": {
     "message": "가져오기는 파일의 설정을 지금 설정에 합쳐요. 파일에 없는 항목은 그대로 남아요."
+  },
+  "engineDefault": {
+    "message": "기본 검색",
+    "description": "Search dropdown: the user's default Chrome search engine"
   }
 }
